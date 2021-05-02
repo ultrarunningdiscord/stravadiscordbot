@@ -46,6 +46,10 @@ class StravaIntegration(discord.Client):
     async def on_ready(self):
         ''' Function fires when bot connects '''
         print('Logged on as', self.user)
+        stravaClubDetails = requests.get('https://www.strava.com/api/v3/clubs/' +
+                                        STRAVACLUB,
+                                        headers=stravaAuthHeader)
+        self.clubDetails = stravaClubDetails.json()
 
     async def on_message(self, message):
         ''' Primary inbound message parsing function '''
@@ -54,11 +58,13 @@ class StravaIntegration(discord.Client):
             return
 
         if message.content == '!statistics':
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{self.clubDetails['name']} Statistics:**\n"
             # Fetching overall statistics via authenticated API
             stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
                                         STRAVACLUB+'/activities',
                                         headers=stravaAuthHeader)
-
             totalDistance = 0
             totalElevationGain = 0
             totalMovingTime = 0
@@ -73,35 +79,38 @@ class StravaIntegration(discord.Client):
                 totalMovingTime += activity['moving_time']
 
             humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
-
-            statisticsMsg = 'Together we have run ' + \
+            #  '**Ultra Running Discord Community Statistics:**\n'
+            statisticsMsg = 'Together we have run: ' + \
                              str(round(totalDistance/1000, 2)) + \
-                             ' km over ' + str(totalActivitiesRecorded) + ' activities. '
+                             ' km over ' + str(totalActivitiesRecorded) + ' activities. \n'
             statisticsMsg += 'Our total elevation gain is ' + \
-                              str(round(totalElevationGain,2)) + 'm. '
+                              str(round(totalElevationGain,2)) + 'm. \n'
             statisticsMsg += 'Our total time spent moving is ' + \
-                              humanMovingTime + '. '
+                              humanMovingTime + '. \n'
 
-
-            await message.channel.send(statisticsMsg)
+            embed.description = statisticsMsg
+            await message.channel.send(embed=embed)
 
         if message.content == '!leaderboard':
-            leaderboardMsg = 'Leaderboard:\n'
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{self.clubDetails['name']} Leaderboard:**\n"
+            # leaderboardMsg = '**Ultra Running Discord Leaderboard:**\n'
            
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                              STRAVACLUB + '/leaderboard',
                                              headers=stravaPublicHeader)
 
             leaderboardJSON = json.loads(publicLeaderboard.content)
-
+            leaderboardMsg = ""
             for rankedUser in leaderboardJSON['data']:
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' (' + \
                                     str(round(rankedUser['distance']/1000, 2)) + \
                                     'km)\n'
-
-            await message.channel.send(leaderboardMsg)
+            embed.description = leaderboardMsg
+            await message.channel.send(embed=embed)
 
 
 client = StravaIntegration()
