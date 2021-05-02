@@ -122,11 +122,11 @@ class StravaIntegration(discord.Client):
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{clubDetails['name']} Strava Club:**\n"
 
-            message = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
-            message += 'Show leaderboard: `!leaderboard`\n'
-            message += 'Show weekly statistics: `!statistics`\n'
-            message += 'Show this message: `!strava`'
-            embed.description = message
+            stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
+            stravaMsg += 'Show leaderboard: `!leaderboard`\n'
+            stravaMsg += 'Show weekly statistics: `!statistics`\n'
+            stravaMsg += 'Show this message: `!strava`'
+            embed.description = stravaMsg
             await message.channel.send(embed=embed)
 
 
