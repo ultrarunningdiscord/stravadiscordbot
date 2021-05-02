@@ -121,10 +121,6 @@ class StravaIntegration(discord.Client):
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{clubDetails['name']} Strava Club:**\n"
-           
-            publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
-                                             STRAVACLUB + '/leaderboard',
-                                             headers=stravaPublicHeader)
 
             message = "Join our Strava club: " + 'https://www.strava.com/clubs/' + STRAVACLUB + '\n'
             message += "Show leaderboard: `!leaderboard`\n"
