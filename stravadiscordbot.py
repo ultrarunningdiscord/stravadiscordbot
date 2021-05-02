@@ -41,26 +41,28 @@ stravaPublicHeader = {'Host': 'www.strava.com ',
                       'Referer': 'https://www.strava.com/clubs/' + STRAVACLUB,
                       'X-Requested-With': 'XMLHttpRequest'}
 
+stravaClubDetails = requests.get('https://www.strava.com/api/v3/clubs/' +
+                                            STRAVACLUB,
+                                            headers=stravaAuthHeader)
+clubDetails = stravaClubDetails.json()
+
 class StravaIntegration(discord.Client):
 
     async def on_ready(self):
         ''' Function fires when bot connects '''
         print('Logged on as', self.user)
-        stravaClubDetails = requests.get('https://www.strava.com/api/v3/clubs/' +
-                                        STRAVACLUB,
-                                        headers=stravaAuthHeader)
-        self.clubDetails = stravaClubDetails.json()
 
     async def on_message(self, message):
         ''' Primary inbound message parsing function '''
         # print('Message:', message.content)
+
         if message.author == self.user:
             return
 
         if message.content == '!statistics':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{self.clubDetails['name']} Statistics:**\n"
+            embed.title = f"**{clubDetails['name']} Statistics:**\n"
             # Fetching overall statistics via authenticated API
             stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
                                         STRAVACLUB+'/activities',
@@ -94,7 +96,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!leaderboard':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{self.clubDetails['name']} Leaderboard:**\n"
+            embed.title = f"**{clubDetails['name']} Leaderboard:**\n"
             # leaderboardMsg = '**Ultra Running Discord Leaderboard:**\n'
            
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
