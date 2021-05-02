@@ -67,7 +67,7 @@ class DistanceConversion():
         else:
             return val
             
-    def round(self, value, roundTo=1, granularity="km"):
+    def round(self, value, roundTo=2, granularity="km"):
         converted = self.convert(value, granularity, unit="imperial")
         sign = 1 if converted >= 0 else -1
         return "{:.{}f}".format((
@@ -75,7 +75,7 @@ class DistanceConversion():
             math.pow(10, roundTo)), roundTo
         )
 
-    def getMiles(self, meters, showUnit=True):
+    def getMiles(self, meters, showUnit=True, roundTo=2):
         """Converts meters to miles
 
         Args:
@@ -87,7 +87,7 @@ class DistanceConversion():
         """
         unit = " miles"
         unitStr = unit if showUnit else ""
-        return f"{self.round(meters)}{unitStr}"
+        return f"{self.round(meters, roundTo=roundTo)}{unitStr}"
 
 # create instances of classes
 distConversion = DistanceConversion()
