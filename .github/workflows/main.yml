@@ -23,6 +23,6 @@ jobs:
             STRAVATOKEN
             STRAVACLUB
         env:
-          DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
-          STRAVATOKEN: ${{secrets.STRAVATOKEN}}
-          STRAVACLUB: ultrarunningdiscord
+          HD_DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
+          HD_STRAVATOKEN: ${{secrets.STRAVATOKEN}}
+          HD_STRAVACLUB: ultrarunningdiscord
