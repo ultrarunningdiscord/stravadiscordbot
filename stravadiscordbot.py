@@ -130,7 +130,7 @@ class StravaIntegration(discord.Client):
             message += "Show leaderboard: `!leaderboard`\n"
             message += "Show weekly statistics: `!statistics`\n"
             message += "Show this message: `!strava`"
-            embed.description = leaderboardMsg
+            embed.description = message
             await message.channel.send(embed=embed)
 
 
