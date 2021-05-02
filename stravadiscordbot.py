@@ -117,6 +117,22 @@ class StravaIntegration(discord.Client):
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
+        if message.content == '!strava':
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{self.clubDetails['name']} Strava Club:**\n"
+           
+            publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
+                                             STRAVACLUB + '/leaderboard',
+                                             headers=stravaPublicHeader)
+
+            message = "Join our Strava club: " + 'https://www.strava.com/clubs/' + STRAVACLUB + '\n'
+            message += "Show leaderboard: `!leaderboard`\n"
+            message += "Show weekly statistics: `!statistics`\n"
+            message += "Show this message: `!strava`"
+            embed.description = leaderboardMsg
+            await message.channel.send(embed=embed)
+
 
 client = StravaIntegration()
 client.run(DISCORDTOKEN)
