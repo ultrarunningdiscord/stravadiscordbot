@@ -75,7 +75,7 @@ class DistanceConversion():
             math.pow(10, roundTo)), roundTo
         )
 
-    def getMiles(self, meters, showUnit=True, roundTo=2):
+    def metersToMiles(self, meters, showUnit=True, roundTo=2):
         """Converts meters to miles
 
         Args:
@@ -89,11 +89,18 @@ class DistanceConversion():
         unitStr = unit if showUnit else ""
         return f"{self.round(meters, roundTo=roundTo)}{unitStr}"
 
+    def metersToFeet(self, meters, showUnit=True, roundTo=2):
+        feet = meters * 3.28084
+        unit = " ft"
+        unitStr = unit if showUnit else ""
+        return "{:.{}f}".format(feet, roundTo) + unitStr
+
 # create instances of classes
 distConversion = DistanceConversion()
 speedConversion = SpeedConversion()
 
 # export functions as standalone for minimal boilerplate
-getMiles = distConversion.getMiles
+metersToMiles = distConversion.metersToMiles
+metersToFeet = distConversion.metersToFeet
 getMinPerKm = speedConversion.getMinPerKm
 getMinPerMile = speedConversion.getMinPerMile

@@ -5,7 +5,7 @@ import discord
 import requests
 import json
 import humanfriendly
-from conversions import getMiles, getMinPerKm, getMinPerMile
+from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
 # Grab the Discord bot token from DISCORDTOKEN environment variable
 DISCORDTOKEN = os.environ.get('DISCORDTOKEN')
@@ -83,11 +83,12 @@ class StravaIntegration(discord.Client):
             #  '**Ultra Running Discord Community Statistics:**\n'
             statisticsMsg = 'Together we have run: ' + \
                              str(round(totalDistance/1000, 2)) + \
-                             ' km or ' + \
-                             getMiles(totalDistance) + \
+                             ' km (' + \
+                             metersToMiles(totalDistance) + ')' +\
                              ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
             statisticsMsg += 'Our total elevation gain is ' + \
-                              str(round(totalElevationGain,2)) + 'm. \n'
+                              str(round(totalElevationGain,2)) + ' m (' + \
+                                 metersToFeet(totalElevationGain) +'). \n'
             statisticsMsg += 'Our total time spent moving is ' + \
                               humanMovingTime + '. \n'
 
@@ -109,10 +110,10 @@ class StravaIntegration(discord.Client):
             for rankedUser in leaderboardJSON['data']:
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
-                                    rankedUser['athlete_lastname'] + ' (' + \
+                                    rankedUser['athlete_lastname'] + ' - ' + \
                                     str(round(rankedUser['distance']/1000, 2)) + \
-                                    'km or ' + \
-                                    getMiles(rankedUser['distance']) + ')\n'
+                                    ' km (' + \
+                                    metersToMiles(rankedUser['distance']) + ')\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
