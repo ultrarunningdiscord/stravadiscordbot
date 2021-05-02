@@ -7,10 +7,7 @@ on:
 
 jobs:
   build:
-    env:
-      DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
-      STRAVATOKEN: ${{secrets.STRAVATOKEN}}
-      STRAVACLUB: ultrarunningdiscord
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +16,8 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "stravadiscordbot" #Must be unique in Heroku
           heroku_email: "lhinds@protonmail.com"
+          usedocker: true
+        env:
+          DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
+          STRAVATOKEN: ${{secrets.STRAVATOKEN}}
+          STRAVACLUB: ultrarunningdiscord
