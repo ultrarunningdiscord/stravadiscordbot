@@ -63,7 +63,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!statistics':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{clubDetails['name']} Statistics:**\n"
+            embed.title = f"**{clubDetails['name']} Weekly Statistics:**\n"
             # Fetching overall statistics via authenticated API
             stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
                                         STRAVACLUB+'/activities',
@@ -82,7 +82,6 @@ class StravaIntegration(discord.Client):
                 totalMovingTime += activity['moving_time']
 
             humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
-            #  '**Ultra Running Discord Community Statistics:**\n'
             statisticsMsg = 'Together we have run: ' + \
                              str(round(totalDistance/1000, 2)) + \
                              ' km or ' + \
@@ -99,9 +98,8 @@ class StravaIntegration(discord.Client):
         if message.content == '!leaderboard':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{clubDetails['name']} Leaderboard:**\n"
-            # leaderboardMsg = '**Ultra Running Discord Leaderboard:**\n'
-           
+            embed.title = f"**{clubDetails['name']} Weekly Leaderboard:**\n"
+
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                              STRAVACLUB + '/leaderboard',
                                              headers=stravaPublicHeader)
