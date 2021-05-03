@@ -10,7 +10,10 @@ import humanfriendly
 from datetime import datetime, date, timedelta
 from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
-redis_conn = redis.Redis(host='localhost', port=6379, db=0)
+try:
+    redis_conn = redis.Redis(host='localhost', port=6379, db=0)
+except (redis.exceptions.ConnectionError, ConnectionRefusedError) as e:
+    print('Redis connection error: ', e)
 
 # Grab the Discord bot token from DISCORDTOKEN environment variable
 DISCORDTOKEN = os.environ.get('DISCORDTOKEN')
@@ -87,8 +90,14 @@ class StravaIntegration(discord.Client):
 
         access_token = stravaTokenReq.json()['access_token']
         access_token_expiry = stravaTokenReq.json()['expires_at']
-        redis_conn.set('token', access_token)
-        redis_conn.set('expiry', access_token_expiry)
+        try:
+            redis_conn.set('token', access_token)
+        except redis.RedisError as e:
+            print('Redis exception: ', e)
+        try:
+            redis_conn.set('expiry', access_token_expiry)
+        except redis.RedisError as e:
+            print('Redis exception: ', e)
         return access_token, access_token_expiry
 
     async def on_message(self, message):
