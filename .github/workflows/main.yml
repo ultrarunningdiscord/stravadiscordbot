@@ -22,4 +22,4 @@ jobs:
           HD_DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
           HD_STRAVATOKEN: ${{secrets.STRAVATOKEN}}
           HD_STRAVACLUB: ultrarunningdiscord
-          HD_STRAVACLUB_PRETTNAME: "Ultrarunning Discord Server"
+          HD_STRAVACLUB_PRETTYNAME: "Ultrarunning Discord Server"
