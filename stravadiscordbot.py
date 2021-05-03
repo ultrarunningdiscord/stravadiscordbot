@@ -32,6 +32,15 @@ if STRAVACLUB is None:
 else:
     print("Strava club is", STRAVACLUB)
 
+
+# Grab the Strava Club ID from STRAVACLUB_PRETTYNAME environment variable
+STRAVACLUB_PRETTYNAME = os.environ.get('STRAVACLUB_PRETTYNAME')
+if STRAVACLUB_PRETTYNAME is None:
+    print("STRAVACLUB_PRETTYNAME variable not set. Unable to launch bot.")
+    sys.exit()
+else:
+    print("Strava pretty club is", STRAVACLUB_PRETTYNAME)
+
 # Building Strava authentication header
 stravaAuthHeader = {'Content-Type': 'application/json',
                     'Authorization': 'Bearer {}'.format(STRAVATOKEN)}
@@ -41,11 +50,6 @@ stravaPublicHeader = {'Host': 'www.strava.com ',
                       'Accept': 'text/javascript,application/javascript ',
                       'Referer': 'https://www.strava.com/clubs/' + STRAVACLUB,
                       'X-Requested-With': 'XMLHttpRequest'}
-
-stravaClubDetails = requests.get('https://www.strava.com/api/v3/clubs/' +
-                                            STRAVACLUB,
-                                            headers=stravaAuthHeader)
-clubDetails = stravaClubDetails.json()
 
 class StravaIntegration(discord.Client):
 
@@ -63,7 +67,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!statistics':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{clubDetails['name']} Weekly Statistics:**\n"
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
             # Fetching overall statistics via authenticated API
             stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
                                         STRAVACLUB+'/activities',
@@ -99,7 +103,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!leaderboard':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{clubDetails['name']} Weekly Leaderboard:**\n"
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Leaderboard:**\n"
 
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                              STRAVACLUB + '/leaderboard',
@@ -120,7 +124,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!strava':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{clubDetails['name']} Strava Club:**\n"
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Strava Club:**\n"
 
             stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
             stravaMsg += 'Show leaderboard: `!leaderboard`\n'

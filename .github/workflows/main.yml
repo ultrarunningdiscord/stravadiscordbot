@@ -18,11 +18,8 @@ jobs:
           heroku_email: "lhinds@protonmail.com"
           docker_heroku_process_type: worker
           usedocker: true
-          # docker_build_args: |
-          #   DISCORDTOKEN
-          #   STRAVATOKEN
-          #   STRAVACLUB
         env:
           HD_DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
           HD_STRAVATOKEN: ${{secrets.STRAVATOKEN}}
           HD_STRAVACLUB: ultrarunningdiscord
+          HD_STRAVACLUB_PRETTNAME: "Ultrarunning Discord Server"
