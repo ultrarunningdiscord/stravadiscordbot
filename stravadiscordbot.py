@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 import os
+import struct
 import sys
 import discord
+import redis
 import requests
 import json
 import humanfriendly
+from datetime import datetime, date, timedelta
 from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
+
+redis_conn = redis.Redis(host='localhost', port=6379, db=0)
 
 # Grab the Discord bot token from DISCORDTOKEN environment variable
 DISCORDTOKEN = os.environ.get('DISCORDTOKEN')
@@ -13,16 +18,32 @@ if DISCORDTOKEN is None:
     print("DISCORDTOKEN variable not set. Unable to launch bot.")
     sys.exit()
 else:
-    print("Discord token is", DISCORDTOKEN)
+    pass
 
 # Grab the Strava auth token from STRAVATOKEN environment variable
 # This is used for Bearer authentication against Strava's API
-STRAVATOKEN = os.environ.get('STRAVATOKEN')
-if STRAVATOKEN is None:
-    print("STRAVATOKEN variable not set. Unable to launch bot.")
+STRAVAREFRESHTOKEN = os.environ.get('STRAVAREFRESHTOKEN')
+if STRAVAREFRESHTOKEN is None:
+    print("STRAVAREFRESHTOKEN variable not set. Unable to launch bot.")
     sys.exit()
 else:
-    print("Strava token is", STRAVATOKEN)
+    pass
+
+# STRAVACLIENTID environment variable
+STRAVACLIENTID = os.environ.get('STRAVACLIENTID')
+if STRAVACLIENTID is None:
+    print("STRAVACLIENTID variable not set. Unable to launch bot.")
+    sys.exit()
+else:
+    pass
+
+# STRAVASECRET environment variable
+STRAVASECRET = os.environ.get('STRAVASECRET')
+if STRAVASECRET is None:
+    print("STRAVASECRET variable not set. Unable to launch bot.")
+    sys.exit()
+else:
+    pass
 
 # Grab the Strava Club ID from STRAVACLUB environment variable
 STRAVACLUB = os.environ.get('STRAVACLUB')
@@ -30,8 +51,7 @@ if STRAVACLUB is None:
     print("STRAVACLUB variable not set. Unable to launch bot.")
     sys.exit()
 else:
-    print("Strava club is", STRAVACLUB)
-
+    pass
 
 # Grab the Strava Club ID from STRAVACLUB_PRETTYNAME environment variable
 STRAVACLUB_PRETTYNAME = os.environ.get('STRAVACLUB_PRETTYNAME')
@@ -39,11 +59,7 @@ if STRAVACLUB_PRETTYNAME is None:
     print("STRAVACLUB_PRETTYNAME variable not set. Unable to launch bot.")
     sys.exit()
 else:
-    print("Strava pretty club is", STRAVACLUB_PRETTYNAME)
-
-# Building Strava authentication header
-stravaAuthHeader = {'Content-Type': 'application/json',
-                    'Authorization': 'Bearer {}'.format(STRAVATOKEN)}
+    pass
 
 # Header used for requests to Strava's open/public APIs
 stravaPublicHeader = {'Host': 'www.strava.com ',
@@ -57,18 +73,53 @@ class StravaIntegration(discord.Client):
         ''' Function fires when bot connects '''
         print('Logged on as', self.user)
 
+    def refresh_token(self):
+        print("Refreshing token")
+        payload = {
+                'client_id' : STRAVACLIENTID,
+                'client_secret' : STRAVASECRET,
+                'refresh_token' : STRAVAREFRESHTOKEN,
+                'grant_type' : "refresh_token",
+                'f':'json'
+            }
+        stravaTokenReq = requests.post('https://www.strava.com/oauth/token',
+                                    data=payload)
+
+        access_token = stravaTokenReq.json()['access_token']
+        access_token_expiry = stravaTokenReq.json()['expires_at']
+        redis_conn.set('token', access_token)
+        redis_conn.set('expiry', access_token_expiry)
+        return access_token, access_token_expiry
+
     async def on_message(self, message):
         ''' Primary inbound message parsing function '''
-        # print('Message:', message.content)
 
         if message.author == self.user:
             return
 
-        if message.content == '!statistics':
+        if message.content == '!stats':
+            try:
+                access_token = redis_conn.get('token').decode()
+                token_expiry = redis_conn.get('expiry').decode()
+            except:
+                # If we except here, its due to a none byte error against decode
+                # TODO there might be a better way to handle this
+                access_token, token_expiry  = self.refresh_token()
+
+            token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
+
+            if datetime.utcnow() > token_expire_time:
+                access_token, token_expiry  = self.refresh_token()
+            else:
+                print("Current token is active")
+
+            stravaAuthHeader = {'Content-Type': 'application/json',
+                    'Authorization': 'Bearer {}'.format(access_token)}
+
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
-            # Fetching overall statistics via authenticated API
+
             stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
                                         STRAVACLUB+'/activities',
                                         headers=stravaAuthHeader)
@@ -78,7 +129,7 @@ class StravaIntegration(discord.Client):
             totalActivitiesRecorded = len(stravaResult.json())
 
             print("Results in dataset: ", totalActivitiesRecorded)
-            print(stravaResult.json())
+            # print(stravaResult.json())
 
             for activity in stravaResult.json():
                 totalDistance += activity['distance']

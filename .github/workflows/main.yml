@@ -20,6 +20,8 @@ jobs:
           usedocker: true
         env:
           HD_DISCORDTOKEN: ${{secrets.DISCORDTOKEN}}
-          HD_STRAVATOKEN: ${{secrets.STRAVATOKEN}}
+          HD_STRAVAREFRESHTOKEN: ${{secrets.STRAVAREFRESHTOKEN}}
+          HD_STRAVASECRET: ${{secrets.STRAVASECRET}}
           HD_STRAVACLUB: ultrarunningdiscord
+          HD_STRAVACLIENTID: 65536
           HD_STRAVACLUB_PRETTYNAME: "Ultrarunning Discord Server"
