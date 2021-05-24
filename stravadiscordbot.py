@@ -187,6 +187,24 @@ class StravaIntegration(discord.Client):
             await message.channel.send(embed=embed)
 
         if message.content == '!monthleaderboard' or message.content == '!monthlb':
+            try:
+                access_token = redis_conn.get('token').decode()
+                token_expiry = redis_conn.get('expiry').decode()
+            except:
+                # If we except here, its due to a none byte error against decode
+                # TODO there might be a better way to handle this
+                access_token, token_expiry  = self.refresh_token()
+
+            token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
+
+            if datetime.utcnow() > token_expire_time:
+                access_token, token_expiry  = self.refresh_token()
+            else:
+                print("Current token is active")
+
+            stravaAuthHeader = {'Content-Type': 'application/json',
+                    'Authorization': 'Bearer {}'.format(access_token)}
+                    
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Monthly Leaderboard:**\n"
@@ -203,7 +221,7 @@ class StravaIntegration(discord.Client):
             while 1:
                 try:
                     msg += 'page ' + str(page_no) + ':\t'
-                    requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
+                    requestParams = {'page': page_no}#, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
                     msg += str(json.dumps(requestParams)) + '\n'
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
