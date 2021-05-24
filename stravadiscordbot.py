@@ -263,7 +263,8 @@ class StravaIntegration(discord.Client):
                     break
             leaderboardMsg += f'{total_activities} total activities.\n'
             leaderboardMsg += f'{len(leaderboard)} total athletes.\n\n'
-            leaderboard.sort(key=lambda x: x['distance'], reverse=True)
+            if len(leaderboard) > 0:
+                leaderboard.sort(key=lambda x: x['distance'], reverse=True)
             for i, athlete in enumerate(leaderboard):
                 boldstr = ""
                 if i < 10:
