@@ -147,12 +147,12 @@ class StravaIntegration(discord.Client):
 
             humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
             statisticsMsg = 'Together we have run: ' + \
-                             str(round(totalDistance/1000, 2)) + \
+                             "{:,}".format(round(totalDistance/1000, 2)) + \
                              ' km (' + \
                              metersToMiles(totalDistance) + ')' +\
                              ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
             statisticsMsg += 'Our total elevation gain is ' + \
-                              str(round(totalElevationGain,2)) + ' m (' + \
+                              "{:,}".format(round(totalElevationGain,2)) + ' m (' + \
                                  metersToFeet(totalElevationGain) +'). \n'
             statisticsMsg += 'Our total time spent moving is ' + \
                               humanMovingTime + '. \n'
@@ -175,7 +175,7 @@ class StravaIntegration(discord.Client):
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
-                                    str(round(rankedUser['distance']/1000, 2)) + \
+                                    "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
                                     ' km (' + \
                                     metersToMiles(rankedUser['distance']) + ')\n'
             embed.description = leaderboardMsg
@@ -193,11 +193,11 @@ class StravaIntegration(discord.Client):
             leaderboardJSON = json.loads(publicLeaderboard.content)
             leaderboardMsg = ""
             leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
-            for rankedUser in leaderboardJSON['data']:
-                leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
+            for i, rankedUser in enumerate(leaderboardJSON['data']):
+                leaderboardMsg +=   str(i+1) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
-                                    str(round(rankedUser['elev_gain'], 2)) + \
+                                   "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
                                     ' m (' + \
                                     metersToFeet(rankedUser['elev_gain']) + ')\n'
             embed.description = leaderboardMsg

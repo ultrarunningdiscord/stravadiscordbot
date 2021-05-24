@@ -87,13 +87,13 @@ class DistanceConversion():
         """
         unit = " miles"
         unitStr = unit if showUnit else ""
-        return f"{self.round(meters, roundTo=roundTo)}{unitStr}"
+        return "{:,}".format(self.round(meters, roundTo=roundTo)) + unitStr
 
     def metersToFeet(self, meters, showUnit=True, roundTo=2):
         feet = meters * 3.28084
         unit = " ft"
         unitStr = unit if showUnit else ""
-        return "{:.{}f}".format(feet, roundTo) + unitStr
+        return "{:,}".format(round(feet, roundTo)) + unitStr
 
 # create instances of classes
 distConversion = DistanceConversion()
