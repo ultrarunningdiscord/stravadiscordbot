@@ -192,7 +192,8 @@ class StravaIntegration(discord.Client):
 
             leaderboardJSON = json.loads(publicLeaderboard.content)
             leaderboardMsg = ""
-            for rankedUser in leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True):
+            leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
+            for rankedUser in leaderboardJSON['data']:
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
@@ -208,9 +209,9 @@ class StravaIntegration(discord.Client):
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Strava Club:**\n"
 
             stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
-            stravaMsg += 'Show leaderboard: `!leaderboard`\n'
-            stravaMsg += 'Show vert leaderboard: `!vertleaderboard`\n'
-            stravaMsg += 'Show weekly statistics: `!stats`\n'
+            stravaMsg += 'Show weekly distance leaderboard: `!leaderboard`\n'
+            stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard`\n'
+            stravaMsg += 'Show 7-day statistics: `!stats`\n'
             stravaMsg += 'Show this message: `!strava`'
             embed.description = stravaMsg
             await message.channel.send(embed=embed)
