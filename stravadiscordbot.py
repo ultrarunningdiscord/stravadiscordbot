@@ -185,7 +185,7 @@ class StravaIntegration(discord.Client):
                                     ')' + boldstr + '\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
-        """
+        
         if message.content == '!monthleaderboard' or message.content == '!monthlb':
             try:
                 access_token = redis_conn.get('token').decode()
@@ -275,7 +275,6 @@ class StravaIntegration(discord.Client):
 
             embed.description = msg
             await message.channel.send(embed=embed)
-        """
 
         if message.content == '!debug':
             embed = discord.Embed()
