@@ -204,7 +204,7 @@ class StravaIntegration(discord.Client):
 
             stravaAuthHeader = {'Content-Type': 'application/json',
                     'Authorization': 'Bearer {}'.format(access_token)}
-                    
+
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Monthly Leaderboard:**\n"
@@ -227,7 +227,7 @@ class StravaIntegration(discord.Client):
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     msg += 'ok does it even get here though?'
-                    msg += str(json.dumps(clubActivities))
+                    msg += str(clubActivities)
                     break
                     clubActivities = json.loads(clubActivities.content)
                     monthActivities.extend(clubActivities['data'])
