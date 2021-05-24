@@ -230,7 +230,7 @@ class StravaIntegration(discord.Client):
                     clubActivities = clubActivities.json()
                     msg += 'after converting to json\n'
                     for i, activity in enumerate(clubActivities):
-                        msg += 'activity {i}...\n'
+                        msg += f'activity {i}...\n'
 
                     # try:
                     #     msg += str(clubActivities)
