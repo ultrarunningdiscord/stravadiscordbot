@@ -226,10 +226,10 @@ class StravaIntegration(discord.Client):
                 try:
                     leaderboardMsg += f"------Page {page_no}------\n"
                     requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
-                    clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
+                    result = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
-                    clubActivities = clubActivities.json()
+                    clubActivities = result.json()
 
                     for activity in clubActivities:
                         # filter by type: 'Run'
