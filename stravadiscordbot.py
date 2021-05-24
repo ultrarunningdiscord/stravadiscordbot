@@ -244,6 +244,7 @@ class StravaIntegration(discord.Client):
                                 athlete['distance'] += activity['distance']
                                 athlete['total_elevation_gain'] += activity['total_elevation_gain']
                                 athlete['num_activities'] += 1
+                                break
 
                         # otherwise add athlete to leaderboard
                         if not found:
@@ -253,12 +254,12 @@ class StravaIntegration(discord.Client):
                                 'total_elevation_gain': activity['total_elevation_gain'],
                                 'num_activities': 1
                             })
-                    if len(clubActivities) < per_page or page_no > 6:
+                    if len(clubActivities) < per_page or page_no > 10:
                         break
                     page_no += 1
                 except:
                     break
-            leaderboardMsg += f'{total_activities} total activities.\n\n'
+            leaderboardMsg += f'{total_activities} total activities.\n'
             leaderboardMsg += f'{len(leaderboard)} total athletes.\n\n'
             leaderboard.sort(key=lambda x: x['distance'], reverse=True)
             for i, athlete in enumerate(leaderboard):
