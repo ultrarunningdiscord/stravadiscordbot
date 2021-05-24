@@ -232,7 +232,6 @@ class StravaIntegration(discord.Client):
                         msg += str(clubActivities)
                     except Exception as e:
                         msg += 'it breaks on .json()\n'
-                        msg += e
                     try:
                         msg += str(dir(clubActivities))
                     except Exception as e:
