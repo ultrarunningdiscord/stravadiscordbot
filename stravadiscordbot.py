@@ -7,7 +7,7 @@ import redis
 import requests
 import json
 import humanfriendly
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, strftime
 import time
 from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
@@ -205,18 +205,20 @@ class StravaIntegration(discord.Client):
             stravaAuthHeader = {'Content-Type': 'application/json',
                     'Authorization': 'Bearer {}'.format(access_token)}
 
-            embed = discord.Embed()
-            embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{STRAVACLUB_PRETTYNAME} Monthly Leaderboard:**\n"
+
 
             # get first day of current month
             today = datetime.utcnow()
             firstDayCurrentMonth = datetime(today.year, today.month, 1)
+
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} {today.strftime('%B')} Leaderboard:**\n"
+
             firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
-            monthActivities = []
             page_no = 1
-            per_page = 2
-            msg = f'TEST\n{firstDayCurrentMonth}\n'
+            per_page = 100
+            leaderboard = []
 
             while 1:
                 try:
@@ -229,27 +231,47 @@ class StravaIntegration(discord.Client):
                     msg += 'after request\n'
                     clubActivities = clubActivities.json()
                     msg += 'after converting to json\n'
-                    for i, activity in enumerate(clubActivities):
-                        msg += f'activity {i}:\n'
-                        msg += str(activity) + '\n'
+                    for activity in clubActivities:
+                        # filter by type: 'Run'
+                        if activity['type'] != 'Run':
+                            continue
+                        # check if athlete exists in leaderboard
+                        name = activity['athlete']['firstname'] + ' ' + activity['athlete']['lastname']
+                        found = False
+                        for athlete in leaderboard:
+                            if athlete['name'] == name:
+                                found = True
+                                athlete['distance'] += activity['distance']
+                                athlete['total_elevation_gain'] += activity['total_elevation_gain']
 
-                    # try:
-                    #     msg += str(clubActivities)
-                    # except:
-                    #     msg += 'it breaks on printing\n'
-                    # try:
-                    #     msg += str(dir(clubActivities))
-                    # except:
-                    #     msg += 'dir() doesnt work\n'
-                    break
-                    # monthActivities.extend(clubActivities['data'])
-                    # if len(clubActivities['data']) < 100:
-                    #     break
-                    # page_no += 1
+                        # otherwise add athlete to leaderboard
+                        if not found:
+                            leaderboard.append({
+                                'name': name,
+                                'distance': activity['distance'],
+                                'total_elevation_gain': activity['total_elevation_gain'],
+                            })
+
+                    if len(clubActivities) < per_page:
+                        break
+                    page_no += 1
                 except:
                     break
 
-
+            leaderboard.sort(key=lambda x: x['distance'], reverse=True)
+            for i, athlete in enumerate(leaderboard):
+                boldstr = ""
+                if i < 10:
+                    boldstr = "**"
+                leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
+                                    athlete['name'] + ' - ' + \
+                                    "{:,}".format(round(athlete['distance']/1000, 2)) + \
+                                    ' km (' + \
+                                    metersToMiles(athlete['distance']) + \
+                                    ')' + boldstr + '\n'
+                # if i > 30:
+                #     break
+            embed.description = leaderboardMsg
 
             embed.description = msg
             await message.channel.send(embed=embed)
