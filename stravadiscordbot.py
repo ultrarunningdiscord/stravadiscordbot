@@ -8,6 +8,7 @@ import requests
 import json
 import humanfriendly
 from datetime import datetime, date, timedelta
+import time
 from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
 try:
@@ -193,9 +194,10 @@ class StravaIntegration(discord.Client):
             # get first day of current month
             today = datetime.utcnow()
             firstDayCurrentMonth = datetime(today.year, today.month, 1)
+            firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
             monthActivities = []
             page_no = 1
-            msg = 'TEST\n'
+            msg = f'TEST\n{firstDayCurrentMonth}\n'
             while 0:
                 try:
                     msg += str(page_no)
