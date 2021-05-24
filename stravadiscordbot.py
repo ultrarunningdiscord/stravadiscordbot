@@ -227,8 +227,8 @@ class StravaIntegration(discord.Client):
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     msg += 'after request\n'
-                    # clubActivities = clubActivities.json()
-                    # msg += 'after converting to json\n'
+                    clubActivities = clubActivities.json()
+                    msg += 'after converting to json\n'
                     # try:
                     #     msg += str(clubActivities)
                     # except:
