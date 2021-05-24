@@ -229,6 +229,8 @@ class StravaIntegration(discord.Client):
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     clubActivities = clubActivities.json()
+                    total_activities += len(clubActivities)
+
                     for activity in clubActivities:
                         # filter by type: 'Run'
                         if activity['type'] != 'Run':
@@ -251,7 +253,6 @@ class StravaIntegration(discord.Client):
                                 'total_elevation_gain': activity['total_elevation_gain'],
                                 'num_activites': 1
                             })
-                    total_activities += len(clubActivities)
                     if len(clubActivities) < per_page or page_no > 6:
                         break
                     page_no += 1
