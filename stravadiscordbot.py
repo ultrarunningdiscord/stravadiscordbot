@@ -196,7 +196,7 @@ class StravaIntegration(discord.Client):
             monthActivities = []
             page_no = 1
             msg = 'TEST\n'
-            while 1:
+            while 0:
                 try:
                     msg += str(page_no)
                     requestParams = {'page': page_no, 'per_page': 100, 'after': firstDayCurrentMonth}
