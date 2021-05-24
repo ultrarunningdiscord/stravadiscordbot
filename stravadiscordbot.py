@@ -227,21 +227,21 @@ class StravaIntegration(discord.Client):
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     msg += 'after request\n'
-                    clubActivities = clubActivities.json()
-                    msg += 'after converting to json\n'
-                    try:
-                        msg += str(clubActivities)
-                    except:
-                        msg += 'it breaks on printing\n'
-                    try:
-                        msg += str(dir(clubActivities))
-                    except:
-                        msg += 'dir() doesnt work\n'
+                    # clubActivities = clubActivities.json()
+                    # msg += 'after converting to json\n'
+                    # try:
+                    #     msg += str(clubActivities)
+                    # except:
+                    #     msg += 'it breaks on printing\n'
+                    # try:
+                    #     msg += str(dir(clubActivities))
+                    # except:
+                    #     msg += 'dir() doesnt work\n'
                     break
-                    monthActivities.extend(clubActivities['data'])
-                    if len(clubActivities['data']) < 100:
-                        break
-                    page_no += 1
+                    # monthActivities.extend(clubActivities['data'])
+                    # if len(clubActivities['data']) < 100:
+                    #     break
+                    # page_no += 1
                 except:
                     break
 
