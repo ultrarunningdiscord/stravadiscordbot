@@ -171,13 +171,17 @@ class StravaIntegration(discord.Client):
 
             leaderboardJSON = json.loads(publicLeaderboard.content)
             leaderboardMsg = ""
-            for rankedUser in leaderboardJSON['data']:
-                leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
+            for i, rankedUser in enumerate(leaderboardJSON['data']):
+                boldstr = ""
+                if i < 10:
+                    boldstr = "**"
+                leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
                                     "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
                                     ' km (' + \
-                                    metersToMiles(rankedUser['distance']) + ')\n'
+                                    metersToMiles(rankedUser['distance']) + \
+                                    ')' + boldstr + '\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
@@ -194,12 +198,16 @@ class StravaIntegration(discord.Client):
             leaderboardMsg = ""
             leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
             for i, rankedUser in enumerate(leaderboardJSON['data']):
-                leaderboardMsg +=   str(i+1) + '. ' + \
+                boldstr = ""
+                if i < 10:
+                    boldstr = "**"
+                leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
                                    "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
                                     ' m (' + \
-                                    metersToFeet(rankedUser['elev_gain']) + ')\n'
+                                    metersToFeet(rankedUser['elev_gain']) + \
+                                    ')' + boldstr + '\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
