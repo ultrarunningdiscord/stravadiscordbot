@@ -181,6 +181,27 @@ class StravaIntegration(discord.Client):
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
+        if message.content == '!vertleaderboard':
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Leaderboard:**\n"
+
+            publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
+                                             STRAVACLUB + '/leaderboard',
+                                             headers=stravaPublicHeader)
+
+            leaderboardJSON = json.loads(publicLeaderboard.content)
+            leaderboardMsg = ""
+            for rankedUser in leaderboardJSON['data']:
+                leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
+                                    rankedUser['athlete_firstname'] + ' ' + \
+                                    rankedUser['athlete_lastname'] + ' - ' + \
+                                    str(round(rankedUser['total_elevation_gain']/1000, 2)) + \
+                                    ' km (' + \
+                                    metersToMiles(rankedUser['total_elevation_gain']) + ')\n'
+            embed.description = leaderboardMsg
+            await message.channel.send(embed=embed)
+
         if message.content == '!strava':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
@@ -188,6 +209,7 @@ class StravaIntegration(discord.Client):
 
             stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
             stravaMsg += 'Show leaderboard: `!leaderboard`\n'
+            stravaMsg += 'Show vert leaderboard: `!vertleaderboard`\n'
             stravaMsg += 'Show weekly statistics: `!stats`\n'
             stravaMsg += 'Show this message: `!strava`'
             embed.description = stravaMsg
