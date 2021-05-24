@@ -195,14 +195,16 @@ class StravaIntegration(discord.Client):
             firstDayCurrentMonth = datetime(today.year, today.month, 1)
             monthActivities = []
             page_no = 1
+            msg = 'TEST\n'
             while 1:
-                requestParams = {'page': page_no, 'per_page': 100, 'after': firstDayCurrentMonth}
                 try:
+                    requestParams = {'page': page_no, 'per_page': 100, 'after': firstDayCurrentMonth}
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     clubActivities = json.loads(clubActivities.content)
                     monthActivities.extend(clubActivities['data'])
+                    msg += str(page_no)
                     if len(clubActivities['data']) < 100:
                         break
                     page_no += 1
@@ -211,7 +213,7 @@ class StravaIntegration(discord.Client):
 
 
 
-            embed.description = 'TEST\n' + str(monthActivities[0])
+            embed.description = msg
             await message.channel.send(embed=embed)
 
         if message.content == '!vertleaderboard' or message.content == '!vertlb':
