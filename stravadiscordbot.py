@@ -163,7 +163,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!leaderboard':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Leaderboard:**\n"
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
 
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                              STRAVACLUB + '/leaderboard',
@@ -184,7 +184,7 @@ class StravaIntegration(discord.Client):
         if message.content == '!vertleaderboard':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
-            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Leaderboard:**\n"
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
 
             publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                              STRAVACLUB + '/leaderboard',
@@ -192,13 +192,13 @@ class StravaIntegration(discord.Client):
 
             leaderboardJSON = json.loads(publicLeaderboard.content)
             leaderboardMsg = ""
-            for rankedUser in leaderboardJSON['data']:
+            for rankedUser in leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True):
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
-                                    str(round(rankedUser['total_elevation_gain'], 2)) + \
+                                    str(round(rankedUser['elev_gain'], 2)) + \
                                     ' m (' + \
-                                    metersToFeet(rankedUser['total_elevation_gain']) + ')\n'
+                                    metersToFeet(rankedUser['elev_gain']) + ')\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
