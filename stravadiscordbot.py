@@ -204,12 +204,11 @@ class StravaIntegration(discord.Client):
                 try:
                     msg += 'page ' + str(page_no) + ':\t'
                     requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
-                    msg += str(json.dumps(requestParams)) + '\t1\n'
-                    msg += str(json.dumps(requestParams)) + '\t2\n'
+                    msg += str(json.dumps(requestParams)) + '\n'
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
-                    msg += str(clubActivities)
+                    msg += str(json.dumps(clubActivities))
                     break
                     clubActivities = json.loads(clubActivities.content)
                     monthActivities.extend(clubActivities['data'])
