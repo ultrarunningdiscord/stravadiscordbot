@@ -185,6 +185,35 @@ class StravaIntegration(discord.Client):
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
+        if message.content == '!monthleaderboard' or message.content == '!monthlb':
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x00ff00)
+            embed.title = f"**{STRAVACLUB_PRETTYNAME} Monthly Leaderboard:**\n"
+
+            # get first day of current month
+            today = datetime.utcnow()
+            firstDayCurrentMonth = datetime(today.year, today.month, 1)
+            monthActivities = []
+            page_no = 1
+            while 1:
+                requestParams = {'page': page_no, 'per_page': 100, 'after': firstDayCurrentMonth}
+                try:
+                    clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
+                                                headers=stravaAuthHeader,
+                                                params=requestParams)
+                    clubActivities = json.loads(clubActivities.content)
+                    monthActivities.extend(clubActivities['data'])
+                    if len(clubActivities['data']) < 100:
+                        break
+                    page_no += 1
+                except e:
+                    break
+
+
+
+            embed.description = 'TEST\n' + str(monthActivities[0])
+            await message.channel.send(embed=embed)
+
         if message.content == '!vertleaderboard' or message.content == '!vertlb':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
