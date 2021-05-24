@@ -251,7 +251,7 @@ class StravaIntegration(discord.Client):
                                 'name': name,
                                 'distance': activity['distance'],
                                 'total_elevation_gain': activity['total_elevation_gain'],
-                                'num_activites': 1
+                                'num_activities': 1
                             })
                     if len(clubActivities) < per_page or page_no > 6:
                         break
