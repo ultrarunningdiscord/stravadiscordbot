@@ -208,6 +208,7 @@ class StravaIntegration(discord.Client):
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
+                    msg += 'ok does it even get here though?'
                     msg += str(json.dumps(clubActivities))
                     break
                     clubActivities = json.loads(clubActivities.content)
