@@ -197,15 +197,17 @@ class StravaIntegration(discord.Client):
             firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
             monthActivities = []
             page_no = 1
+            per_page = 5
             msg = f'TEST\n{firstDayCurrentMonth}\n'
+
             while 1:
                 try:
                     msg += str(page_no)
-                    requestParams = {'page': page_no, 'per_page': 100, 'after': firstDayCurrentMonth}
+                    requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
-                    msg += str(dir(clubActivities))
+                    msg += str(clubActivities)
                     break
                     clubActivities = json.loads(clubActivities.content)
                     monthActivities.extend(clubActivities['data'])
