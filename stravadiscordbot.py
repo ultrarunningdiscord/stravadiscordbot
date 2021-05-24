@@ -229,12 +229,13 @@ class StravaIntegration(discord.Client):
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
                     clubActivities = clubActivities.json()
-                    total_activities += len(clubActivities)
 
                     for activity in clubActivities:
                         # filter by type: 'Run'
                         if activity['type'] != 'Run':
                             continue
+
+                        total_activities += 1
                         # check if athlete exists in leaderboard
                         name = activity['athlete']['firstname'] + ' ' + activity['athlete']['lastname']
                         found = False
@@ -254,7 +255,7 @@ class StravaIntegration(discord.Client):
                                 'total_elevation_gain': activity['total_elevation_gain'],
                                 'num_activities': 1
                             })
-                    if len(clubActivities) < per_page or page_no > 10:
+                    if len(clubActivities) < per_page or page_no > 20:
                         break
                     page_no += 1
                 except:
