@@ -160,7 +160,7 @@ class StravaIntegration(discord.Client):
             embed.description = statisticsMsg
             await message.channel.send(embed=embed)
 
-        if message.content == '!leaderboard':
+        if message.content == '!leaderboard' or message.content == '!lb':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
@@ -185,7 +185,7 @@ class StravaIntegration(discord.Client):
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
-        if message.content == '!vertleaderboard' or message.content == '!vert':
+        if message.content == '!vertleaderboard' or message.content == '!vertlb':
             embed = discord.Embed()
             embed = discord.Embed(color=0x00ff00)
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
@@ -217,8 +217,8 @@ class StravaIntegration(discord.Client):
             embed.title = f"**{STRAVACLUB_PRETTYNAME} Strava Club:**\n"
 
             stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + STRAVACLUB + '\n'
-            stravaMsg += 'Show weekly distance leaderboard: `!leaderboard`\n'
-            stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vert`\n'
+            stravaMsg += 'Show weekly distance leaderboard: `!leaderboard` or `!lb`\n'
+            stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vertlb`\n'
             stravaMsg += 'Show 7-day statistics: `!stats`\n'
             stravaMsg += 'Show this message: `!strava`'
             embed.description = stravaMsg
