@@ -7,7 +7,7 @@ import redis
 import requests
 import json
 import humanfriendly
-from datetime import datetime, date, timedelta, strftime
+from datetime import datetime, date, timedelta
 import time
 from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
@@ -219,18 +219,16 @@ class StravaIntegration(discord.Client):
             page_no = 1
             per_page = 50
             leaderboard = []
+            total_activities = 0
+            leaderboardMsg = ''
 
             while 1:
                 try:
-                    msg += '------- Page ' + str(page_no) + ' -------\n'
                     requestParams = {'page': page_no, 'per_page': per_page, 'after': firstDayCurrentMonth}
-                    msg += 'params: ' + str(json.dumps(requestParams)) + '\n'
                     clubActivities = requests.get('https://www.strava.com/api/v3/clubs/' + STRAVACLUB + '/activities',
                                                 headers=stravaAuthHeader,
                                                 params=requestParams)
-                    msg += 'after request\n'
                     clubActivities = clubActivities.json()
-                    msg += 'after converting to json\n'
                     for activity in clubActivities:
                         # filter by type: 'Run'
                         if activity['type'] != 'Run':
@@ -243,6 +241,7 @@ class StravaIntegration(discord.Client):
                                 found = True
                                 athlete['distance'] += activity['distance']
                                 athlete['total_elevation_gain'] += activity['total_elevation_gain']
+                                athlete['num_activities'] += 1
 
                         # otherwise add athlete to leaderboard
                         if not found:
@@ -250,14 +249,15 @@ class StravaIntegration(discord.Client):
                                 'name': name,
                                 'distance': activity['distance'],
                                 'total_elevation_gain': activity['total_elevation_gain'],
+                                'num_activites': 1
                             })
-
+                    total_activities += len(clubActivities)
                     if len(clubActivities) < per_page or page_no > 6:
                         break
                     page_no += 1
                 except:
                     break
-
+            leaderboardMsg += f'{total_activities} total activities.\n\n'
             leaderboard.sort(key=lambda x: x['distance'], reverse=True)
             for i, athlete in enumerate(leaderboard):
                 boldstr = ""
@@ -268,12 +268,10 @@ class StravaIntegration(discord.Client):
                                     "{:,}".format(round(athlete['distance']/1000, 2)) + \
                                     ' km (' + \
                                     metersToMiles(athlete['distance']) + \
-                                    ')' + boldstr + '\n'
+                                    ')' + boldstr + ' over ' + str(athlete['num_activities']) + ' runs\n'
                 # if i > 30:
                 #     break
             embed.description = leaderboardMsg
-
-            embed.description = msg
             await message.channel.send(embed=embed)
 
         if message.content == '!debug':
