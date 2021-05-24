@@ -217,7 +217,7 @@ class StravaIntegration(discord.Client):
 
             firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
             page_no = 1
-            per_page = 100
+            per_page = 50
             leaderboard = []
 
             while 1:
@@ -252,7 +252,7 @@ class StravaIntegration(discord.Client):
                                 'total_elevation_gain': activity['total_elevation_gain'],
                             })
 
-                    if len(clubActivities) < per_page:
+                    if len(clubActivities) < per_page or page_no > 6:
                         break
                     page_no += 1
                 except:
