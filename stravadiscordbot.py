@@ -258,19 +258,17 @@ class StravaIntegration(discord.Client):
                 except:
                     break
             leaderboardMsg += f'{total_activities} total activities.\n\n'
-            leaderboard.sort(key=lambda x: x['distance'], reverse=True)
-            for i, athlete in enumerate(leaderboard):
-                boldstr = ""
-                if i < 10:
-                    boldstr = "**"
-                leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
-                                    athlete['name'] + ' - ' + \
-                                    "{:,}".format(round(athlete['distance']/1000, 2)) + \
-                                    ' km (' + \
-                                    metersToMiles(athlete['distance']) + \
-                                    ')' + boldstr + ' over ' + str(athlete['num_activities']) + ' runs\n'
-                # if i > 30:
-                #     break
+            # leaderboard.sort(key=lambda x: x['distance'], reverse=True)
+            # for i, athlete in enumerate(leaderboard):
+            #     boldstr = ""
+            #     if i < 10:
+            #         boldstr = "**"
+            #     leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
+            #                         athlete['name'] + ' - ' + \
+            #                         "{:,}".format(round(athlete['distance']/1000, 2)) + \
+            #                         ' km (' + \
+            #                         metersToMiles(athlete['distance']) + \
+            #                         ')' + boldstr + ' over ' + str(athlete['num_activities']) + ' runs\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
