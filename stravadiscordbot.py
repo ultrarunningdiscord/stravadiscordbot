@@ -196,9 +196,9 @@ class StravaIntegration(discord.Client):
                 leaderboardMsg +=   str(rankedUser['rank']) + '. ' + \
                                     rankedUser['athlete_firstname'] + ' ' + \
                                     rankedUser['athlete_lastname'] + ' - ' + \
-                                    str(round(rankedUser['total_elevation_gain']/1000, 2)) + \
-                                    ' km (' + \
-                                    metersToMiles(rankedUser['total_elevation_gain']) + ')\n'
+                                    str(round(rankedUser['total_elevation_gain'], 2)) + \
+                                    ' m (' + \
+                                    metersToFeet(rankedUser['total_elevation_gain']) + ')\n'
             embed.description = leaderboardMsg
             await message.channel.send(embed=embed)
 
