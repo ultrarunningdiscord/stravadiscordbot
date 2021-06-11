@@ -71,7 +71,7 @@ class Globals(Borg):
 
         # Grab the Discord bot token from DISCORDTOKEN environment variable
         self.botToken = os.environ.get('DISCORDTOKEN')
-        self.botToken = 'ODUyOTcyMTY5MTY4MDI3Njk4.YMOmPA.pPtfKxBOTqf4RTzmahdVQBy10XA'
+        
         if self.botToken is None:
             print("DISCORDTOKEN variable not set. Unable to launch bot.")
             sys.exit()
