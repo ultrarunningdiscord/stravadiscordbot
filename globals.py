@@ -10,13 +10,15 @@ import time
 
 from borg import Borg
 
+
+
 # Global data class for environment, tokens, other global information the bot needs as well as global functions
 class Globals(Borg):
     def __init__(self):
         Borg.__init__(self)
         self.debug = False
         self.running = True
-
+        self.userDataFile = 'stravaBot.userData'
         try:
             self.redis_conn = redis.Redis(host='localhost', port=6379, db=0)
         except (redis.exceptions.ConnectionError, ConnectionRefusedError) as e:
@@ -44,6 +46,15 @@ class Globals(Borg):
         self.STRAVAREFRESHTOKEN = os.environ.get('STRAVAREFRESHTOKEN')
         if self.STRAVAREFRESHTOKEN is None:
             print("STRAVAREFRESHTOKEN variable not set. Unable to launch bot.")
+            sys.exit()
+        else:
+            pass
+
+        # Grab the Strava auth token from STRAVATOKEN environment variable
+        # This is used for Bearer authentication against Strava's API
+        self.STRAVATOKEN = os.environ.get('STRAVATOKEN')
+        if self.STRAVATOKEN is None:
+            print("STRAVATOKEN variable not set. Unable to launch bot.")
             sys.exit()
         else:
             pass
@@ -82,8 +93,8 @@ class Globals(Borg):
         self.session = None
         self.cacheTimeout = 3600
         self.initialFree = 10000.0
-        self.resolveTime = '11:54'
-        self.resolveThread = None
+        self.resolveTime = '23:59'
+        self.leaderThread = None
 
     def refresh_token(self):
         print("Refreshing token")
@@ -108,6 +119,15 @@ class Globals(Borg):
         except redis.RedisError as e:
             print('Redis exception: ', e)
         return access_token, access_token_expiry
+
+    async def loadLeaderboard(self):
+        publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
+                                         self.STRAVACLUB + '/leaderboard',
+                                         headers=self.stravaPublicHeader)
+
+        leaderboardJSON = json.loads(publicLeaderboard.content)
+
+        return leaderboardJSON
 
     async def checkCache(self, cacheTime):
         loadCache = False
@@ -149,3 +169,4 @@ class Globals(Borg):
             found = True
 
         return found
+

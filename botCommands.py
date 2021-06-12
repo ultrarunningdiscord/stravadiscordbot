@@ -4,6 +4,8 @@ import discord
 import humanfriendly
 import json
 import requests
+import swagger_client as swagger_client
+from swagger_client.rest import ApiException
 import time
 
 from datetime import datetime, date, timedelta
@@ -14,8 +16,10 @@ from discord.ext import commands
 
 
 import globals
-globalData = globals.Globals()
+import userData
 
+globalData = globals.Globals()
+uData = userData.UserData()
 # Commands for the bot...just make sure to append to the commandList to rgister the command
 commandList = []
 
@@ -41,11 +45,8 @@ async def _leaderboard(ctx, *args):
     embed = discord.Embed(color=0x00ff00)
     embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
 
-    publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
-                                     globalData.STRAVACLUB + '/leaderboard',
-                                     headers=globalData.stravaPublicHeader)
+    leaderboardJSON = await globalData.loadLeaderboard()
 
-    leaderboardJSON = json.loads(publicLeaderboard.content)
     leaderboardMsg = ""
     for i, rankedUser in enumerate(leaderboardJSON['data']):
         boldstr = ""
@@ -159,6 +160,35 @@ async def _monthleaderboard(ctx, *args):
     await currChannel.send(embed=embed)
 
 commandList.append(_monthleaderboard)
+
+@commands.command()
+async def register(ctx, *args):
+    print('# ALS - register username w/ strava')
+    user = ctx.message.author.id
+
+    try:
+        access_token = globalData.redis_conn.get('token').decode()
+        token_expiry = globalData.redis_conn.get('expiry').decode()
+    except:
+        # If we except here, its due to a none byte error against decode
+        # TODO there might be a better way to handle this
+        access_token, token_expiry  = globalData.refresh_token()
+
+    token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
+
+    if datetime.utcnow() > token_expire_time:
+        access_token, token_expiry = globalData.refresh_token()
+    else:
+        print("Current token is active")
+
+    stravaAuthHeader = {'Content-Type': 'application/json',
+                        'Authorization': 'Bearer {}'.format(access_token)}
+    stravaResult = requests.get('https://www.strava.com/api/v3/athlete/',
+                                headers=stravaAuthHeader)
+    stravaAthleteId = json.loads(stravaResult.content)['id']
+    await uData.registerStravaID(user=user, stravaId=stravaAthleteId)
+
+commandList.append(register)
 
 @commands.command()
 async def stats(ctx, *args):

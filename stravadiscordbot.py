@@ -1,21 +1,11 @@
 #!/usr/bin/env python3
 import asyncio
-import discord
-import os
-import humanfriendly
-import json
 
-import requests
-import struct
-import sys
-import time
+from threading import Event
 
-
-from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
-from datetime import datetime, date, timedelta
 from discord.ext.commands import Bot
-from discord import Status
 
+import distanceLeader
 import globals
 import botCommands
 import help
@@ -39,31 +29,20 @@ for c in botCommands.commandList:
 async def on_ready():
     print('We have logged in as {0.user}'.format(stravaBot))
 
-# @stravaBot.command()
-# async def leaderboard(ctx, *args):
-#     failed = True
-#     team = None
-#
-#     user = ctx.message.author
-#     currChannel = ctx.message.channel
-#
-#
-#     await currChannel.send('```Invalid sport, choices are nfl, nba or mlb. Type !help for full details```')
-
 
 m_loop = asyncio.get_event_loop()
 
 def main():
     global m_loop
     try:
-        # Start resolve bets
-        # stop_shots = Event()
-        # globals.resolveThread = Resolve(stop_shots)
-        # globals.resolveThread.start()
+        # Start distanceLeader event
+        stop_shots = Event()
+        globals.leaderThread = distanceLeader.DistanceLeader(stop_shots)
+        globals.leaderThread.start()
         stravaBot.run(globalData.botToken)
 
     finally:
-        # globals.resolveThread.cancel()
+        globals.leaderThread.cancel()
         #m_loop.run_until_complete(globals.session.close())
         pass
 

@@ -26,7 +26,8 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         stravaMsg += 'Show weekly distance leaderboard: `!leaderboard` or `!lb`\n'
         stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vertlb`\n'
         stravaMsg += 'Show 7-day statistics: `!stats`\n'
-        stravaMsg += 'Show this message: `!strava`'
+        stravaMsg += 'Show this message: `!strava or !help`'
+        stravaMsg += 'Register Discord ID w/ Strava ID(must be logged in to Strava): `!register`'
         embed.description = stravaMsg
         if ctx is not None:
             currChannel = ctx.message.channel
