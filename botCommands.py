@@ -166,7 +166,8 @@ async def _monthleaderboard(ctx, *args):
 commandList.append(_monthleaderboard)
 
 @commands.command()
-async def register(ctx, *args):
+async def _register(ctx, *args):
+    # TODO Disable until strava API auth is figured out
     print('# ALS - register username w/ strava')
     user = ctx.message.author.id
     currChannel = ctx.message.channel

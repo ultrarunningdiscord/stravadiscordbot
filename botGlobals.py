@@ -39,12 +39,13 @@ def initUserData():
     global userDataFile
     try:
         userData = json.loads(redis_conn.get(userDataFile))
+        if not userData:
+            # Initialize it with empty dictionary
+            userData = {}
+            redis_conn.set(userDataFile, json.dumps(userData))
     except Exception as e:
         print('# Failed to access redis-server in initUserData')
-    if not userData:
-        # Initialize it with empty dictionary
-        userData = {}
-        redis_conn.set(userDataFile, json.dumps(userData))
+
     # File system approach
     # try:
     #     f = open(botGlobals.userDataFile, "r")
