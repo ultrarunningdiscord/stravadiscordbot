@@ -33,7 +33,7 @@ async def debug(ctx, *args):
 
 commandList.append(debug)
 
-@commands.command(name='leaderboard', aliases=('lb'))
+@commands.command(name='leaderboard', aliases=('lb','foo'))
 async def _leaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
@@ -63,7 +63,7 @@ async def _leaderboard(ctx, *args):
 
 commandList.append(_leaderboard)
 
-@commands.command(name='monthleaderboard', aliases=('monthlb'))
+@commands.command(name='monthleaderboard', aliases=('monthlb', 'month'))
 async def _monthleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
@@ -156,7 +156,7 @@ async def _monthleaderboard(ctx, *args):
                             metersToMiles(athlete['distance']) + \
                             ')' + boldstr + ' over ' + str(athlete['num_activities']) + ' runs\n'
     embed.description = leaderboardMsg
-    await currChannel.channel.send(embed=embed)
+    await currChannel.send(embed=embed)
 
 commandList.append(_monthleaderboard)
 
@@ -242,7 +242,7 @@ async def strava(ctx, *args):
 
 commandList.append(strava)
 
-@commands.command(name='vertleaderboard', aliases=('vertlb'))
+@commands.command(name='vertleaderboard', aliases=('vertlb','vlb'))
 async def _vertleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
@@ -253,7 +253,8 @@ async def _vertleaderboard(ctx, *args):
     publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                      globalData.STRAVACLUB + '/leaderboard',
                                      headers=globalData.stravaPublicHeader)
-
+    print('# ALS - pub header + ' + str(globalData.stravaPublicHeader))
+    print('# ALS - publicLeaderboard '+ str(publicLeaderboard.content))
     leaderboardJSON = json.loads(publicLeaderboard.content)
     leaderboardMsg = ""
     leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
@@ -269,7 +270,7 @@ async def _vertleaderboard(ctx, *args):
                             metersToFeet(rankedUser['elev_gain']) + \
                             ')' + boldstr + '\n'
     embed.description = leaderboardMsg
-    await currChannel.channel.send(embed=embed)
+    await currChannel.send(embed=embed)
 
 commandList.append(_vertleaderboard)
 

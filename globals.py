@@ -71,7 +71,7 @@ class Globals(Borg):
 
         # Grab the Discord bot token from DISCORDTOKEN environment variable
         self.botToken = os.environ.get('DISCORDTOKEN')
-        
+
         if self.botToken is None:
             print("DISCORDTOKEN variable not set. Unable to launch bot.")
             sys.exit()
@@ -94,7 +94,7 @@ class Globals(Borg):
             'grant_type' : "refresh_token",
             'f':'json'
         }
-        stravaTokenReq = requests.post('https://www.strava.com/oauth/token',
+        stravaTokenReq = requests.post('https://www.strava.com/api/v3/oauth/token',
                                        data=payload)
 
         access_token = stravaTokenReq.json()['access_token']
