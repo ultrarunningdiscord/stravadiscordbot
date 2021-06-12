@@ -1,11 +1,7 @@
-import asyncio
-import aiohttp
 import discord
 import humanfriendly
 import json
 import requests
-import swagger_client as swagger_client
-from swagger_client.rest import ApiException
 import time
 
 from datetime import datetime, date, timedelta
