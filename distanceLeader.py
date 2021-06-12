@@ -7,15 +7,15 @@ import time
 
 from threading import Timer, Thread, Event
 
-import globals
-globalData = globals.Globals()
+import botGlobals
+
 
 class DistanceLeader(Thread):
     def __init__(self, event):
         print('# ALS - DistanceLeader __init__')
         Thread.__init__(self)
         self.finished = event
-        schedule.every().day.at(globalData.resolveTime).do(self.crownDistanceLeader)
+        schedule.every().day.at(botGlobals.resolveTime).do(self.crownDistanceLeader)
         #schedule.every(30).seconds.do(self.crownDistanceLeader)
         self.loop = None
 
@@ -38,7 +38,7 @@ class DistanceLeader(Thread):
         self.loop.close()
 
     async def findLeader(self):
-        leaderboardJSON = await globalData.loadLeaderboard()
+        leaderboardJSON = await botGlobals.loadLeaderboard()
         print('# ALS - leaderboard '+str(leaderboardJSON))
 
     def run(self):

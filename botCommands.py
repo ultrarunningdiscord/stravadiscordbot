@@ -15,11 +15,9 @@ from discord.ext import commands
 
 
 
-import globals
-import userData
+import botGlobals
 
-globalData = globals.Globals()
-uData = userData.UserData()
+
 # Commands for the bot...just make sure to append to the commandList to rgister the command
 commandList = []
 
@@ -37,24 +35,34 @@ async def debug(ctx, *args):
 
 commandList.append(debug)
 
-@commands.command(name='leaderboard', aliases=('lb','foo'))
+@commands.command(name='leaderboard', aliases=('lb','leader'))
 async def _leaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
 
-    leaderboardJSON = await globalData.loadLeaderboard()
+    leaderboardJSON = await botGlobals.loadLeaderboard()
 
     leaderboardMsg = ""
     for i, rankedUser in enumerate(leaderboardJSON['data']):
         boldstr = ""
         if i < 10:
             boldstr = "**"
+        athleteId = rankedUser['athlete_id']
+        discordId = await botGlobals.retrieveDiscordID(athleteId)
+        aUser = None
+        if discordId:
+            aUser = await ctx.bot.fetch_user(discordId)
+
         leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
                             rankedUser['athlete_firstname'] + ' ' + \
-                            rankedUser['athlete_lastname'] + ' - ' + \
+                            rankedUser['athlete_lastname']
+        if aUser:
+            leaderboardMsg += ' [' + str(aUser.display_name) + ']'
+
+        leaderboardMsg +=   ' - ' + \
                             "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
                             ' km (' + \
                             metersToMiles(rankedUser['distance']) + \
@@ -69,17 +77,17 @@ async def _monthleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
     try:
-        access_token = globalData.redis_conn.get('token').decode()
-        token_expiry = globalData.redis_conn.get('expiry').decode()
+        access_token = botGlobals.redis_conn.get('token').decode()
+        token_expiry = botGlobals.redis_conn.get('expiry').decode()
     except:
         # If we except here, its due to a none byte error against decode
         # TODO there might be a better way to handle this
-        access_token, token_expiry  = globalData.refresh_token()
+        access_token, token_expiry  = botGlobals.refresh_token()
 
     token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
 
     if datetime.utcnow() > token_expire_time:
-        access_token, token_expiry  = globalData.refresh_token()
+        access_token, token_expiry  = botGlobals.refresh_token()
     else:
         print("Current token is active")
 
@@ -94,7 +102,7 @@ async def _monthleaderboard(ctx, *args):
 
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} {today.strftime('%B')} Leaderboard:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {today.strftime('%B')} Leaderboard:**\n"
 
     firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
     page_no = 1
@@ -107,7 +115,7 @@ async def _monthleaderboard(ctx, *args):
         try:
             leaderboardMsg += f"------Page {page_no}------\n"
             requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
-            result = requests.get('https://www.strava.com/api/v3/clubs/' + globalData.STRAVACLUB + '/activities',
+            result = requests.get('https://www.strava.com/api/v3/clubs/' + botGlobals.STRAVACLUB + '/activities',
                                   headers=stravaAuthHeader,
                                   params=requestParams)
             clubActivities = result.json()
@@ -165,28 +173,22 @@ commandList.append(_monthleaderboard)
 async def register(ctx, *args):
     print('# ALS - register username w/ strava')
     user = ctx.message.author.id
-
-    try:
-        access_token = globalData.redis_conn.get('token').decode()
-        token_expiry = globalData.redis_conn.get('expiry').decode()
-    except:
-        # If we except here, its due to a none byte error against decode
-        # TODO there might be a better way to handle this
-        access_token, token_expiry  = globalData.refresh_token()
-
-    token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
-
-    if datetime.utcnow() > token_expire_time:
-        access_token, token_expiry = globalData.refresh_token()
-    else:
-        print("Current token is active")
+    currChannel = ctx.message.channel
+    access_token = botGlobals.getNewToken()
+    authorizePage = 'https://www.strava.com/oauth/authorize?client_id='+botGlobals.STRAVACLIENTID
+    authorizePage += '&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read'
 
     stravaAuthHeader = {'Content-Type': 'application/json',
                         'Authorization': 'Bearer {}'.format(access_token)}
     stravaResult = requests.get('https://www.strava.com/api/v3/athlete/',
                                 headers=stravaAuthHeader)
-    stravaAthleteId = json.loads(stravaResult.content)['id']
-    await uData.registerStravaID(user=user, stravaId=stravaAthleteId)
+    if stravaResult.status_code == 200:
+        stravaAthleteId = json.loads(stravaResult.content)['id']
+        await botGlobals.registerStravaID(user=user, stravaId=stravaAthleteId)
+        await currChannel.send('Successfully registered Strava ID with Discord ID')
+    else:
+        await currChannel.send('Failed to register Strava ID with Discord ID')
+    pass
 
 commandList.append(register)
 
@@ -195,58 +197,45 @@ async def stats(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
 
-    try:
-        access_token = globalData.redis_conn.get('token').decode()
-        token_expiry = globalData.redis_conn.get('expiry').decode()
-    except:
-        # If we except here, its due to a none byte error against decode
-        # TODO there might be a better way to handle this
-        access_token, token_expiry  = globalData.refresh_token()
-
-    token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
-
-    if datetime.utcnow() > token_expire_time:
-        access_token, token_expiry  = globalData.refresh_token()
-    else:
-        print("Current token is active")
+    access_token = botGlobals.getToken()
 
     stravaAuthHeader = {'Content-Type': 'application/json',
                         'Authorization': 'Bearer {}'.format(access_token)}
 
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
 
     stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
-                                globalData.STRAVACLUB+'/activities',
+                                botGlobals.STRAVACLUB+'/activities',
                                 headers=stravaAuthHeader)
-    totalDistance = 0
-    totalElevationGain = 0
-    totalMovingTime = 0
-    totalActivitiesRecorded = len(stravaResult.json())
+    if stravaResult.status_code == 200:
+        totalDistance = 0
+        totalElevationGain = 0
+        totalMovingTime = 0
+        totalActivitiesRecorded = len(stravaResult.json())
 
-    print("Results in dataset: ", totalActivitiesRecorded)
-    # print(stravaResult.json())
+        for activity in stravaResult.json():
+            totalDistance += activity['distance']
+            totalElevationGain += activity['total_elevation_gain']
+            totalMovingTime += activity['moving_time']
 
-    for activity in stravaResult.json():
-        totalDistance += activity['distance']
-        totalElevationGain += activity['total_elevation_gain']
-        totalMovingTime += activity['moving_time']
+        humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
+        statisticsMsg = 'Together we have run: ' + \
+                        "{:,}".format(round(totalDistance/1000, 2)) + \
+                        ' km (' + \
+                        metersToMiles(totalDistance) + ')' + \
+                        ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
+        statisticsMsg += 'Our total elevation gain is ' + \
+                         "{:,}".format(round(totalElevationGain,2)) + ' m (' + \
+                         metersToFeet(totalElevationGain) +'). \n'
+        statisticsMsg += 'Our total time spent moving is ' + \
+                         humanMovingTime + '. \n'
 
-    humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
-    statisticsMsg = 'Together we have run: ' + \
-                    "{:,}".format(round(totalDistance/1000, 2)) + \
-                    ' km (' + \
-                    metersToMiles(totalDistance) + ')' + \
-                    ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
-    statisticsMsg += 'Our total elevation gain is ' + \
-                     "{:,}".format(round(totalElevationGain,2)) + ' m (' + \
-                     metersToFeet(totalElevationGain) +'). \n'
-    statisticsMsg += 'Our total time spent moving is ' + \
-                     humanMovingTime + '. \n'
-
-    embed.description = statisticsMsg
-    await currChannel.send(embed=embed)
+        embed.description = statisticsMsg
+        await currChannel.send(embed=embed)
+    else:
+        await currChannel.send('Failed to authorize to load activity data.')
 
 commandList.append(stats)
 
@@ -257,9 +246,9 @@ async def strava(ctx, *args):
     currChannel = ctx.message.channel
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} Strava Club:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Strava Club:**\n"
 
-    stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + globalData.STRAVACLUB + '\n'
+    stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + botGlobals.STRAVACLUB + '\n'
 
     stravaMsg += 'Show weekly distance leaderboard: `!leaderboard` or `!lb`\n'
     stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vertlb`\n'
@@ -278,13 +267,11 @@ async def _vertleaderboard(ctx, *args):
     currChannel = ctx.message.channel
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{globalData.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
 
     publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
-                                     globalData.STRAVACLUB + '/leaderboard',
-                                     headers=globalData.stravaPublicHeader)
-    print('# ALS - pub header + ' + str(globalData.stravaPublicHeader))
-    print('# ALS - publicLeaderboard '+ str(publicLeaderboard.content))
+                                     botGlobals.STRAVACLUB + '/leaderboard',
+                                     headers=botGlobals.stravaPublicHeader)
     leaderboardJSON = json.loads(publicLeaderboard.content)
     leaderboardMsg = ""
     leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
@@ -292,9 +279,19 @@ async def _vertleaderboard(ctx, *args):
         boldstr = ""
         if i < 10:
             boldstr = "**"
+        athleteId = rankedUser['athlete_id']
+        discordId = await botGlobals.retrieveDiscordID(athleteId)
+        aUser = None
+        if discordId:
+            aUser = await ctx.bot.fetch_user(discordId)
+
         leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
                             rankedUser['athlete_firstname'] + ' ' + \
-                            rankedUser['athlete_lastname'] + ' - ' + \
+                            rankedUser['athlete_lastname']
+        if aUser:
+            leaderboardMsg += ' [' + str(aUser.display_name) + ']'
+
+        leaderboardMsg +=   ' - ' + \
                             "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
                             ' m (' + \
                             metersToFeet(rankedUser['elev_gain']) + \

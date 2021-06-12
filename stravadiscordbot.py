@@ -6,11 +6,11 @@ from threading import Event
 from discord.ext.commands import Bot
 
 import distanceLeader
-import globals
+import botGlobals
 import botCommands
 import help
 
-globalData = globals.Globals()
+
 
 
 
@@ -33,16 +33,17 @@ async def on_ready():
 m_loop = asyncio.get_event_loop()
 
 def main():
+    botGlobals.init() # Initialize all the environment variables, etc.
     global m_loop
     try:
         # Start distanceLeader event
         stop_shots = Event()
-        globals.leaderThread = distanceLeader.DistanceLeader(stop_shots)
-        globals.leaderThread.start()
-        stravaBot.run(globalData.botToken)
+        botGlobals.leaderThread = distanceLeader.DistanceLeader(stop_shots)
+        botGlobals.leaderThread.start()
+        stravaBot.run(botGlobals.botToken)
 
     finally:
-        globals.leaderThread.cancel()
+        botGlobals.leaderThread.cancel()
         #m_loop.run_until_complete(globals.session.close())
         pass
 
