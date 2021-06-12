@@ -187,7 +187,7 @@ async def _register(ctx, *args):
         await currChannel.send('Failed to register Strava ID with Discord ID')
     pass
 
-commandList.append(register)
+commandList.append(_register)
 
 @commands.command()
 async def stats(ctx, *args):
