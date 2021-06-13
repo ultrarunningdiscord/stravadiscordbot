@@ -428,7 +428,7 @@ async def _vertleaderboard(ctx, *args):
                                     "{:,}".format(round(rankedUser['distance']/1000, None)) + \
                                     ' km (' + \
                                     metersToMiles(meters=rankedUser['distance'], showUnit=False, roundTo=0) + \
-                                    'm)' + boldstr + '\n'
+                                    'mi)' + boldstr + '\n'
 
 
 
