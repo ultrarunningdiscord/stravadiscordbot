@@ -69,11 +69,7 @@ class DistanceConversion():
             
     def round(self, value, roundTo=2, granularity="km"):
         converted = self.convert(value, granularity, unit="imperial")
-        sign = 1 if converted >= 0 else -1
-        return "{:,}".format((
-            round(converted * math.pow(10, roundTo) + sign * 0.0001) /
-            math.pow(10, roundTo)), roundTo
-        )
+        return "{:,}".format(round(converted, roundTo))
 
     def metersToMiles(self, meters, showUnit=True, roundTo=2):
         """Converts meters to miles
@@ -91,7 +87,7 @@ class DistanceConversion():
 
     def metersToFeet(self, meters, showUnit=True, roundTo=2):
         feet = meters * 3.28084
-        unit = " ft"
+        unit = "ft"
         unitStr = unit if showUnit else ""
         return "{:,}".format(round(feet, roundTo)) + unitStr
 
