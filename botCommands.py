@@ -38,11 +38,11 @@ async def _fullleaderboard(ctx, *args):
     currChannel = ctx.message.channel
     embedMesg = []
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0x0000ff)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
     embedMesg.append(embed)
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0x0000ff)
     leaderboardJSON = await botGlobals.loadLeaderboard()
 
     if leaderboardJSON is not None:
@@ -98,11 +98,11 @@ async def _fullvert(ctx, *args):
     currChannel = ctx.message.channel
     embedMesg = []
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0xff0000)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
     embedMesg.append(embed)
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0xff0000)
     leaderboardJSON = await botGlobals.loadLeaderboard()
     if leaderboardJSON is not None:
         leaderboardMsg = ""
@@ -164,7 +164,7 @@ async def _leaderboard(ctx, *args):
     currChannel = ctx.message.channel
     embedMesg = []
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0x0000ff)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
 
     leaderboardJSON = await botGlobals.loadLeaderboard()
@@ -395,7 +395,7 @@ async def _vertleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
     embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
+    embed = discord.Embed(color=0xff0000)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
     leaderboardJSON = await botGlobals.loadLeaderboard()
     if leaderboardJSON is not None:
