@@ -155,7 +155,9 @@ def refresh_token():
                                    data=payload)
 
     access_token = stravaTokenReq.json()['access_token']
-    access_token_expiry = stravaTokenReq.json()['expires_in']
+    #access_token_expiry = stravaTokenReq.json()['expires_in']
+    # Use fixed time for expiration 1 hour in seconds
+    access_token_expiry = 60 * 60
     global redis_conn
     try:
         redis_conn.set('token', access_token)
