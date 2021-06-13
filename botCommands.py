@@ -418,13 +418,13 @@ async def _vertleaderboard(ctx, *args):
                 if aUser:
                     leaderboardMsg += ' [' + str(aUser.display_name) + ']'
 
-                leaderboardMsg +=   ' - ' + \
+                leaderboardMsg +=   ': ' + \
                                     "{:,}".format(round(rankedUser['elev_gain'], None)) + \
                                     'm (' + \
                                     metersToFeet(rankedUser['elev_gain'], roundTo=None) + \
-                                    ')' + ''
+                                    ')'
 
-                leaderboardMsg +=   '-' + \
+                leaderboardMsg +=   ' over ' + \
                                     "{:,}".format(round(rankedUser['distance']/1000, None)) + \
                                     'km (' + \
                                     metersToMiles(meters=rankedUser['distance'], showUnit=False, roundTo=None) + \
