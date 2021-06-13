@@ -169,16 +169,12 @@ def getNewToken():
     return stravaToken
 
 async def loadLeaderboard():
-    print('# ALS - load leaderboard')
     publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                      STRAVACLUB + '/leaderboard',
                                      headers=stravaPublicHeader)
-    print('# ALS - lb '+str(publicLeaderboard))
     leaderboardJSON = None
     if publicLeaderboard.status_code == 200:
-        print('# ALS - load json')
         leaderboardJSON = json.loads(publicLeaderboard.content)
-        print('# ALS - finished json load')
 
     return leaderboardJSON
 

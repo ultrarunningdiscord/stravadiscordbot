@@ -422,12 +422,13 @@ async def _vertleaderboard(ctx, *args):
                                     "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
                                     ' m (' + \
                                     metersToFeet(rankedUser['elev_gain']) + \
-                                    ')' + ' : '
-                leaderboardMsg +=   ' - ' + \
-                                    "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
+                                    ')' + ''
+
+                leaderboardMsg +=   '-' + \
+                                    "{:,}".format(round(rankedUser['distance']/1000, None)) + \
                                     ' km (' + \
-                                    metersToMiles(rankedUser['distance']) + \
-                                    ')' + boldstr + '\n'
+                                    metersToMiles(meters=rankedUser['distance'], showUnit=False, roundTo=0) + \
+                                    'm)' + boldstr + '\n'
 
 
 
