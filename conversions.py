@@ -87,7 +87,7 @@ class DistanceConversion():
 
     def metersToFeet(self, meters, showUnit=True, roundTo=2):
         feet = meters * 3.28084
-        unit = " ft"
+        unit = "ft"
         unitStr = unit if showUnit else ""
         return "{:,}".format(round(feet, roundTo)) + unitStr
 
