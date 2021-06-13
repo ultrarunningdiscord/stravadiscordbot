@@ -12,6 +12,7 @@ from discord.ext import commands
 
 
 import botGlobals
+import help
 
 
 # Commands for the bot...just make sure to append to the commandList to rgister the command
@@ -35,40 +36,63 @@ commandList.append(debug)
 async def _leaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
+    embedMesg = []
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
-
+    embedMesg.append(embed)
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x00ff00)
     leaderboardJSON = await botGlobals.loadLeaderboard()
 
-    leaderboardMsg = ""
-    for i, rankedUser in enumerate(leaderboardJSON['data']):
-        boldstr = ""
-        if i < 10:
-            boldstr = "**"
-        athleteId = rankedUser['athlete_id']
-        discordId = await botGlobals.retrieveDiscordID(athleteId)
-        aUser = None
-        if discordId:
-            aUser = await ctx.bot.fetch_user(discordId)
+    if leaderboardJSON is not None:
+        leaderboardMsg = ""
+        linesPerEmbed = 20
+        for i, rankedUser in enumerate(leaderboardJSON['data']):
+            boldstr = ""
+            if i < 10:
+                boldstr = "**"
+            athleteId = rankedUser['athlete_id']
+            discordId = await botGlobals.retrieveDiscordID(athleteId)
+            aUser = None
+            if discordId:
+                aUser = await ctx.bot.fetch_user(discordId)
 
-        leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
-                            rankedUser['athlete_firstname'] + ' ' + \
-                            rankedUser['athlete_lastname']
-        if aUser:
-            leaderboardMsg += ' [' + str(aUser.display_name) + ']'
+            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
+                                rankedUser['athlete_firstname'] + ' ' + \
+                                rankedUser['athlete_lastname']
+            if aUser:
+                leaderboardMsg += ' [' + str(aUser.display_name) + ']'
 
-        leaderboardMsg +=   ' - ' + \
-                            "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
-                            ' km (' + \
-                            metersToMiles(rankedUser['distance']) + \
-                            ')' + boldstr + '\n'
-    embed.description = leaderboardMsg
-    await currChannel.send(embed=embed)
+            leaderboardMsg +=   ' - ' + \
+                                "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
+                                ' km (' + \
+                                metersToMiles(rankedUser['distance']) + \
+                                ')' + boldstr + '\n'
+            if linesPerEmbed <= 0:
+                # Store current
+                embed.description = leaderboardMsg
+                embedMesg.append(embed)
+
+                # Start a new embed message
+                embed = discord.Embed()
+                embed = discord.Embed(color=0x00ff00)
+                linesPerEmbed = 20
+                leaderboardMsg = ''
+            else:
+                linesPerEmbed -= 1
+        if leaderboardMsg:
+            embed.description = leaderboardMsg
+            embedMesg.append(embed)
+
+        for e in embedMesg:
+            await currChannel.send(embed=e)
+    else:
+        await currChannel.send('Failed to load leaderboard. Please try again later.')
 
 commandList.append(_leaderboard)
 
-@commands.command(name='monthleaderboard', aliases=('monthlb', 'month'))
+@commands.command()#name='monthleaderboard', aliases=('monthlb', 'month'))
 async def _monthleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
@@ -195,63 +219,54 @@ async def stats(ctx, *args):
     currChannel = ctx.message.channel
 
     access_token = botGlobals.getToken()
+    if access_token is not None:
+        stravaAuthHeader = {'Content-Type': 'application/json',
+                            'Authorization': 'Bearer {}'.format(access_token)}
 
-    stravaAuthHeader = {'Content-Type': 'application/json',
-                        'Authorization': 'Bearer {}'.format(access_token)}
+        embed = discord.Embed()
+        embed = discord.Embed(color=0x00ff00)
+        embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
 
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Statistics:**\n"
+        stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
+                                    botGlobals.STRAVACLUB+'/activities',
+                                    headers=stravaAuthHeader)
+        if stravaResult.status_code == 200:
+            totalDistance = 0
+            totalElevationGain = 0
+            totalMovingTime = 0
+            totalActivitiesRecorded = len(stravaResult.json())
 
-    stravaResult = requests.get('https://www.strava.com/api/v3/clubs/' +
-                                botGlobals.STRAVACLUB+'/activities',
-                                headers=stravaAuthHeader)
-    if stravaResult.status_code == 200:
-        totalDistance = 0
-        totalElevationGain = 0
-        totalMovingTime = 0
-        totalActivitiesRecorded = len(stravaResult.json())
+            for activity in stravaResult.json():
+                totalDistance += activity['distance']
+                totalElevationGain += activity['total_elevation_gain']
+                totalMovingTime += activity['moving_time']
 
-        for activity in stravaResult.json():
-            totalDistance += activity['distance']
-            totalElevationGain += activity['total_elevation_gain']
-            totalMovingTime += activity['moving_time']
+            humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
+            statisticsMsg = 'Together we have run: ' + \
+                            "{:,}".format(round(totalDistance/1000, 2)) + \
+                            ' km (' + \
+                            metersToMiles(totalDistance) + ')' + \
+                            ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
+            statisticsMsg += 'Our total elevation gain is ' + \
+                             "{:,}".format(round(totalElevationGain,2)) + ' m (' + \
+                             metersToFeet(totalElevationGain) +'). \n'
+            statisticsMsg += 'Our total time spent moving is ' + \
+                             humanMovingTime + '. \n'
 
-        humanMovingTime = humanfriendly.format_timespan(totalMovingTime)
-        statisticsMsg = 'Together we have run: ' + \
-                        "{:,}".format(round(totalDistance/1000, 2)) + \
-                        ' km (' + \
-                        metersToMiles(totalDistance) + ')' + \
-                        ' over ' + str(totalActivitiesRecorded) + ' activities. \n'
-        statisticsMsg += 'Our total elevation gain is ' + \
-                         "{:,}".format(round(totalElevationGain,2)) + ' m (' + \
-                         metersToFeet(totalElevationGain) +'). \n'
-        statisticsMsg += 'Our total time spent moving is ' + \
-                         humanMovingTime + '. \n'
-
-        embed.description = statisticsMsg
-        await currChannel.send(embed=embed)
+            embed.description = statisticsMsg
+            await currChannel.send(embed=embed)
+        else:
+            await currChannel.send('Failed to authorize to load activity data.')
     else:
-        await currChannel.send('Failed to authorize to load activity data.')
+        await currChannel.send('Error with Strava API. Try again later.')
 
 commandList.append(stats)
 
 @commands.command()
 async def strava(ctx, *args):
-    # TODO fix this to use help command itself
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Strava Club:**\n"
-
-    stravaMsg = 'Join our Strava club: https://www.strava.com/clubs/' + botGlobals.STRAVACLUB + '\n'
-
-    stravaMsg += 'Show weekly distance leaderboard: `!leaderboard` or `!lb`\n'
-    stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vertlb`\n'
-    stravaMsg += 'Show 7-day statistics: `!stats`\n'
-    stravaMsg += 'Show this message: `!strava`'
-    embed.description = stravaMsg
+    embed = await help.helpMsg()
 
 
     await currChannel.send(embed=embed)
@@ -262,39 +277,64 @@ commandList.append(strava)
 async def _vertleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
+    embedMesg = []
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
     embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
+    embedMesg.append(embed)
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x00ff00)
+    leaderboardJSON = await botGlobals.loadLeaderboard()
+    if leaderboardJSON is not None:
+        leaderboardMsg = ""
+        leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
+        linesPerEmbed = 20
+        for i, rankedUser in enumerate(leaderboardJSON['data']):
+            boldstr = ""
+            if i < 10:
+                boldstr = "**"
+            athleteId = rankedUser['athlete_id']
+            discordId = await botGlobals.retrieveDiscordID(athleteId)
+            aUser = None
+            if discordId:
+                aUser = await ctx.bot.fetch_user(discordId)
 
-    publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
-                                     botGlobals.STRAVACLUB + '/leaderboard',
-                                     headers=botGlobals.stravaPublicHeader)
-    leaderboardJSON = json.loads(publicLeaderboard.content)
-    leaderboardMsg = ""
-    leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
-    for i, rankedUser in enumerate(leaderboardJSON['data']):
-        boldstr = ""
-        if i < 10:
-            boldstr = "**"
-        athleteId = rankedUser['athlete_id']
-        discordId = await botGlobals.retrieveDiscordID(athleteId)
-        aUser = None
-        if discordId:
-            aUser = await ctx.bot.fetch_user(discordId)
+            leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
+                                rankedUser['athlete_firstname'] + ' ' + \
+                                rankedUser['athlete_lastname']
+            if aUser:
+                leaderboardMsg += ' [' + str(aUser.display_name) + ']'
 
-        leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
-                            rankedUser['athlete_firstname'] + ' ' + \
-                            rankedUser['athlete_lastname']
-        if aUser:
-            leaderboardMsg += ' [' + str(aUser.display_name) + ']'
+            leaderboardMsg +=   ' - ' + \
+                                "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
+                                ' m (' + \
+                                metersToFeet(rankedUser['elev_gain']) + \
+                                ')' + ' : '
+            leaderboardMsg +=   ' - ' + \
+                                "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
+                                ' km (' + \
+                                metersToMiles(rankedUser['distance']) + \
+                                ')' + boldstr + '\n'
+            if linesPerEmbed <= 0:
+                # Store current
+                embed.description = leaderboardMsg
+                embedMesg.append(embed)
 
-        leaderboardMsg +=   ' - ' + \
-                            "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
-                            ' m (' + \
-                            metersToFeet(rankedUser['elev_gain']) + \
-                            ')' + boldstr + '\n'
-    embed.description = leaderboardMsg
-    await currChannel.send(embed=embed)
+                # Start a new embed message
+                embed = discord.Embed()
+                embed = discord.Embed(color=0x00ff00)
+                linesPerEmbed = 20
+                leaderboardMsg = ''
+            else:
+                linesPerEmbed -= 1
 
+        if leaderboardMsg:
+            embed.description = leaderboardMsg
+            embedMesg.append(embed)
+
+        for e in embedMesg:
+            await currChannel.send(embed=e)
+    else:
+        await currChannel.send('Failed to load leaderboard. Please try again later.')
 commandList.append(_vertleaderboard)
 

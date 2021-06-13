@@ -1,8 +1,7 @@
-
-
 from datetime import datetime, date, timedelta
 import json
 import os
+import pickle
 import redis
 import requests
 import sys
@@ -17,13 +16,15 @@ running = True
 userDataFile = 'stravaBot.userData'
 userData = {}
 redis_conn = None
-STRAVACLUB = None
-STRAVACLUB_PRETTYNAME = None
-STRAVAREFRESHTOKEN = None
-STRAVATOKEN = None
-STRAVACLIENTID = None
-STRAVASECRET = None
+STRAVACLUB = ''
+STRAVACLUB_PRETTYNAME = ''
+STRAVAREFRESHTOKEN = ''
+STRAVATOKEN = ''
+STRAVACLIENTID = ''
+STRAVASECRET = ''
 botToken = None
+stravaToken = None
+stravaTokenExpire = None
 stravaPublicHeader = None
 admin = [302457136959586304]
 session = None
@@ -32,36 +33,9 @@ initialFree = 10000.0
 resolveTime = '23:59'
 leaderThread = None
 
-def initUserData():
-    # Load the data
-    global userData
-    global redis_conn
-    global userDataFile
-    try:
-        userData = json.loads(redis_conn.get(userDataFile))
-        if not userData:
-            # Initialize it with empty dictionary
-            userData = {}
-            redis_conn.set(userDataFile, json.dumps(userData))
-    except Exception as e:
-        print('# Failed to access redis-server in initUserData')
-
-    # File system approach
-    # try:
-    #     f = open(botGlobals.userDataFile, "r")
-    #     if os.path.getsize(botGlobals.userDataFile) > 0:
-    #         userData = json.load(f)
-    # except IOError:
-    #     try:
-    #         open(botGlobals.userDataFile, "w+")
-    #     except:
-    #         print('# FAILED no data and not able to write it')
-    #         exit()
-
 def init():
-
+    global redis_conn
     try:
-        global redis_conn
         redis_conn = redis.Redis(host='localhost', port=6379, db=0)
     except (redis.exceptions.ConnectionError, ConnectionRefusedError) as e:
         print('Redis connection error: ', e)
@@ -72,9 +46,7 @@ def init():
     STRAVACLUB = os.environ.get('STRAVACLUB')
     if STRAVACLUB is None:
         print("STRAVACLUB variable not set. Unable to launch bot.")
-        sys.exit()
-    else:
-        pass
+
 
     # Grab the Strava Club ID from STRAVACLUB_PRETTYNAME environment variable
     global STRAVACLUB_PRETTYNAME
@@ -91,9 +63,7 @@ def init():
     STRAVAREFRESHTOKEN = os.environ.get('STRAVAREFRESHTOKEN')
     if STRAVAREFRESHTOKEN is None:
         print("STRAVAREFRESHTOKEN variable not set. Unable to launch bot.")
-        sys.exit()
-    else:
-        pass
+
 
     # Grab the Strava auth token from STRAVATOKEN environment variable
     # This is used for Bearer authentication against Strava's API
@@ -110,18 +80,14 @@ def init():
     STRAVACLIENTID = os.environ.get('STRAVACLIENTID')
     if STRAVACLIENTID is None:
         print("STRAVACLIENTID variable not set. Unable to launch bot.")
-        sys.exit()
-    else:
-        pass
+
 
     # STRAVASECRET environment variable
     global STRAVASECRET
     STRAVASECRET = os.environ.get('STRAVASECRET')
     if STRAVASECRET is None:
         print("STRAVASECRET variable not set. Unable to launch bot.")
-        sys.exit()
-    else:
-        pass
+
     global stravaPublicHeader
     stravaPublicHeader = {'Host': 'www.strava.com ',
                           'Accept': 'text/javascript,application/javascript ',
@@ -134,15 +100,13 @@ def init():
 
     if botToken is None:
         print("DISCORDTOKEN variable not set. Unable to launch bot.")
-        sys.exit()
-    else:
-        pass
 
-    # Initialize data file
-    initUserData()
+
+
 
 
 def refresh_token():
+    global stravaToken, stravaTokenExpire, redis_conn
     print("Refreshing token")
     payload = {
         'client_id' : STRAVACLIENTID,
@@ -151,58 +115,70 @@ def refresh_token():
         'grant_type' : "refresh_token",
         'f':'json'
     }
+    stravaToken = None # Initialize for clients to check against
+
     stravaTokenReq = requests.post('https://www.strava.com/api/v3/oauth/token',
                                    data=payload)
+    if stravaTokenReq.status_code == 200:
+        stravaToken = stravaTokenReq.json()['access_token']
 
-    access_token = stravaTokenReq.json()['access_token']
-    #access_token_expiry = stravaTokenReq.json()['expires_in']
-    # Use fixed time for expiration 1 hour in seconds
-    access_token_expiry = 60 * 60
-    global redis_conn
-    try:
-        redis_conn.set('token', access_token)
-    except redis.RedisError as e:
-        print('Redis exception: ', e)
-    try:
-        redis_conn.set('expiry', access_token_expiry)
-    except redis.RedisError as e:
-        print('Redis exception: ', e)
-    return access_token, access_token_expiry
+        # Use fixed time for expiration 1 hour in seconds
+        stravaTokenExpire = datetime.utcnow() + timedelta(seconds=int(60 * 60))
+
+        if redis_conn is not None:
+            try:
+                redis_conn.set('token', stravaToken)
+            except redis.RedisError as e:
+                print('Redis exception: ', e)
+            try:
+                redis_conn.set('expiry', pickle.dumps(stravaTokenExpire))
+            except redis.RedisError as e:
+                print('Redis exception: ', e)
+
+    return stravaToken, stravaTokenExpire
 
 def getToken():
-    global redis_conn
-    try:
-        access_token = redis_conn.get('token').decode()
-        token_expiry = redis_conn.get('expiry').decode()
-    except:
-        # If we except here, its due to a none byte error against decode
-        # TODO there might be a better way to handle this
-        access_token, token_expiry = refresh_token()
+    global redis_conn, stravaToken, stravaTokenExpire
+    if redis_conn is not None:
+        try:
+            stravaToken = redis_conn.get('token').decode()
+            stravaTokenExpire = redis_conn.get('expiry')
+            if stravaTokenExpire is None:
+                stravaToken, stravaTokenExpire = refresh_token()
+            else:
+                # Convert to datetime object
+                stravaTokenExpire = pickle.dumps(stravaTokenExpire)
+        except:
+            # If we except here, its due to a none byte error against decode
+            # TODO there might be a better way to handle this
+            stravaToken, stravaTokenExpire = refresh_token()
 
-    token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
-
-    if datetime.utcnow() > token_expire_time:
-        access_token, token_expiry = refresh_token()
+    if datetime.utcnow() > stravaTokenExpire:
+        stravaToken, stravaTokenExpire = refresh_token()
     else:
         print("Current token is active")
 
-    return access_token
+    return stravaToken
 
 def getNewToken():
-    global redis_conn
-
-    access_token, token_expiry = refresh_token()
+    global stravaToken, stravaTokenExpire
+    stravaToken, stravaTokenExpire = refresh_token()
 
     print('# Refresh token')
 
-    return access_token
+    return stravaToken
 
 async def loadLeaderboard():
+    print('# ALS - load leaderboard')
     publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                      STRAVACLUB + '/leaderboard',
                                      headers=stravaPublicHeader)
-
-    leaderboardJSON = json.loads(publicLeaderboard.content)
+    print('# ALS - lb '+str(publicLeaderboard))
+    leaderboardJSON = None
+    if publicLeaderboard.status_code == 200:
+        print('# ALS - load json')
+        leaderboardJSON = json.loads(publicLeaderboard.content)
+        print('# ALS - finished json load')
 
     return leaderboardJSON
 
@@ -250,6 +226,19 @@ async def retrieveDiscordID(stravaId):
 
     return None
 
+# Determine if we have access to the Strava API
+async def checkStravaAPI(ctx=None):
+    stravaAccess = False
+
+    return stravaAccess
+
+async def checkAdmin(ctx=None):
+    global admin
+    if ctx is not None:
+        name = ctx.message.author.id
+        if name in admin:
+            return True
+    return False
 
 async def checkCache(cacheTime):
     loadCache = False
