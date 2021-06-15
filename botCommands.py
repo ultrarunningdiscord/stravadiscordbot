@@ -9,10 +9,10 @@ from conversions import metersToMiles, metersToFeet, getMinPerKm, getMinPerMile
 
 from discord.ext import commands
 
-
-
 import botGlobals
+import cmdImpl
 import help
+import userData
 
 
 # Commands for the bot...just make sure to append to the commandList to rgister the command
@@ -36,59 +36,7 @@ commandList.append(debug)
 async def _fullleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embedMesg = []
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x0000ff)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
-    embedMesg.append(embed)
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x0000ff)
-    leaderboardJSON = await botGlobals.loadLeaderboard()
-
-    if leaderboardJSON is not None:
-        leaderboardMsg = ""
-        linesPerEmbed = 20
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            boldstr = ""
-            if i < 10:
-                boldstr = "**"
-            athleteId = rankedUser['athlete_id']
-            discordId = await botGlobals.retrieveDiscordID(athleteId)
-            aUser = None
-            if discordId:
-                aUser = await ctx.bot.fetch_user(discordId)
-
-            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
-                                rankedUser['athlete_firstname'] + ' ' + \
-                                rankedUser['athlete_lastname']
-            if aUser:
-                leaderboardMsg += ' [' + str(aUser.display_name) + ']'
-
-            leaderboardMsg +=   ' - ' + \
-                                "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
-                                ' km (' + \
-                                metersToMiles(rankedUser['distance']) + \
-                                ')' + boldstr + '\n'
-            if linesPerEmbed <= 0:
-                # Store current
-                embed.description = leaderboardMsg
-                embedMesg.append(embed)
-
-                # Start a new embed message
-                embed = discord.Embed()
-                embed = discord.Embed(color=0x00ff00)
-                linesPerEmbed = 20
-                leaderboardMsg = ''
-            else:
-                linesPerEmbed -= 1
-        if leaderboardMsg:
-            embed.description = leaderboardMsg
-            embedMesg.append(embed)
-
-        for e in embedMesg:
-            await currChannel.send(embed=e)
-    else:
-        await currChannel.send('Failed to load leaderboard. Please try again later.')
+    await cmdImpl.leaderboardImpl(channel=currChannel, bot=ctx.bot)
 
 commandList.append(_fullleaderboard)
 
@@ -113,7 +61,7 @@ async def _fullvert(ctx, *args):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            discordId = await botGlobals.retrieveDiscordID(athleteId)
+            discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
             if discordId:
                 aUser = await ctx.bot.fetch_user(discordId)
@@ -162,50 +110,7 @@ commandList.append(_fullvert)
 async def _leaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embedMesg = []
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x0000ff)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Distance Leaderboard:**\n"
-
-    leaderboardJSON = await botGlobals.loadLeaderboard()
-
-    if leaderboardJSON is not None:
-        leaderboardMsg = ""
-
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            if i < 30:
-                boldstr = ""
-                if i < 10:
-                    boldstr = "**"
-                athleteId = rankedUser['athlete_id']
-                discordId = await botGlobals.retrieveDiscordID(athleteId)
-                aUser = None
-                if discordId:
-                    aUser = await ctx.bot.fetch_user(discordId)
-
-                leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
-                                    rankedUser['athlete_firstname'] + ' ' + \
-                                    rankedUser['athlete_lastname']
-                if aUser:
-                    leaderboardMsg += ' [' + str(aUser.display_name) + ']'
-
-                leaderboardMsg +=   ' - ' + \
-                                    "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
-                                    ' km (' + \
-                                    metersToMiles(rankedUser['distance']) + \
-                                    ')' + boldstr + '\n'
-
-            else:
-                break
-
-
-        embed.description = leaderboardMsg
-
-
-
-        await currChannel.send(embed=embed)
-    else:
-        await currChannel.send('Failed to load leaderboard. Please try again later.')
+    await cmdImpl.leaderboardImpl(channel=currChannel, bot=ctx.bot, entries=30)
 
 commandList.append(_leaderboard)
 
@@ -306,27 +211,105 @@ async def _monthleaderboard(ctx, *args):
 
 commandList.append(_monthleaderboard)
 
-@commands.command()
+@commands.command(name='register')
 async def _register(ctx, *args):
-    # TODO Disable until strava API auth is figured out
-    print('# ALS - register username w/ strava')
-    user = ctx.message.author.id
+    # Interact with the user to connect their strava athlete id w/ discord id
+    # using the current leaderboard rank
+    # !register - sends DM describing command flow and leaderboard in a DM w/ leaderboard first
+    # !register <number of leaderboard> - Assigns the current strava athlete at that position to
+    #                                     the discord user and prints out confirmation
+    # !register erase - Removes the current discord id from any strava id connection
+    # !register erase <number of lb> - Admin only command that removes that discord id from that strava athlete id
+    user = ctx.message.author
     currChannel = ctx.message.channel
-    access_token = botGlobals.getNewToken()
-    authorizePage = 'https://www.strava.com/oauth/authorize?client_id='+botGlobals.STRAVACLIENTID
-    authorizePage += '&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read'
+    dmChannel = user.dm_channel
+    if dmChannel is None:
+        dmChannel = await user.create_dm()
 
-    stravaAuthHeader = {'Content-Type': 'application/json',
-                        'Authorization': 'Bearer {}'.format(access_token)}
-    stravaResult = requests.get('https://www.strava.com/api/v3/athlete/',
-                                headers=stravaAuthHeader)
-    if stravaResult.status_code == 200:
-        stravaAthleteId = json.loads(stravaResult.content)['id']
-        await botGlobals.registerStravaID(user=user, stravaId=stravaAthleteId)
-        await currChannel.send('Successfully registered Strava ID with Discord ID')
-    else:
-        await currChannel.send('Failed to register Strava ID with Discord ID')
-    pass
+    if (len(args) == 0):
+        # Open DM channel and display leaderboard w/ help on !register <rank>
+
+
+        leaderboard = await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+        # Display information for the user to execute the command to associate the strava id w/ discord id
+        mesg = '\n\n'
+        mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'
+        mesg += '!register <rank>\n'
+        mesg += 'If you make a mistake, just use !register erase```'
+        await dmChannel.send(mesg)
+
+        # Cache the leaderboard for 10 minutes
+        #uData = userData.getData(user=ctx.message.author.id)
+
+    elif (len(args) == 1):
+        if args[0] == 'erase':
+
+            # Erase my entry in the database for discord id
+            deleteWorked = await userData.deleteDiscordID(discordId=ctx.message.author.id)
+            mesg = ''
+            if deleteWorked is not None:
+                mesg = 'Successfully removed registration. Type !register to restart the process if needed.'
+            else:
+                mesg = 'Registration not found for you.'
+
+            await dmChannel.send(mesg)
+
+        elif args[0].isdigit():
+            rankPos = int(args[0])
+            # Check the cache to see if its valid
+
+            # Set the strava ID
+            stravaId = None
+            wrongRank = True
+            leaderboardJSON = await botGlobals.loadLeaderboard()
+            if leaderboardJSON is not None:
+                for rank, rankedUser in enumerate(leaderboardJSON['data']):
+                    if rank == (rankPos - 1):
+                        # This is our athlete
+                        stravaId = rankedUser['athlete_id']
+                        wrongRank = False
+                        break
+
+            if stravaId is not None:
+                # Delete any potential current registration
+                result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
+                dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId)
+
+                if dataSet:
+                    # Display leaderboard for last check
+                    await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                    # Remove cache and cache expiration
+                    mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
+                    mesg += '       !register erase then !register to restart registration process.'
+                    await dmChannel.send(mesg)
+            else:
+                if wrongRank:
+                    await dmChannel.send('The rank you entered does not exist.')
+
+
+    elif (len(args) == 2):
+        admin = await botGlobals.checkAdmin(ctx=ctx)
+        if admin:
+            if args[0] == 'erase':
+                if args[1].isdigit():
+                    deletePos = int(args[1])
+                    stravaId = None
+                    leaderboardJSON = await botGlobals.loadLeaderboard()
+                    if leaderboardJSON is not None:
+                        for rank, rankedUser in enumerate(leaderboardJSON['data']):
+                            if rank == (deletePos - 1):
+                                # This is our athlete
+                                stravaId = rankedUser['athlete_id']
+                                break
+                        if stravaId is not None:
+                            discordId = await userData.retrieveDiscordID(stravaId=stravaId)
+                            deleteWorked = await userData.deleteDiscordID(discordId=discordId)
+                            if deleteWorked:
+                                await dmChannel.send('{ADMIN} : Deletion success.')
+                    else:
+                        await dmChannel.send('Failed to load the leaderboard.')
+
+                pass
 
 commandList.append(_register)
 
@@ -407,7 +390,7 @@ async def _vertleaderboard(ctx, *args):
                 if i < 10:
                     boldstr = "**"
                 athleteId = rankedUser['athlete_id']
-                discordId = await botGlobals.retrieveDiscordID(athleteId)
+                discordId = await userData.retrieveDiscordID(athleteId)
                 aUser = None
                 if discordId:
                     aUser = await ctx.bot.fetch_user(discordId)
