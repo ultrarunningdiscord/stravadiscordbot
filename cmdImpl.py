@@ -121,7 +121,7 @@ async def vertleaderboardImpl(channel, bot, entries=None):
             if discordId and bot is not None:
                 aUser = await bot.fetch_user(discordId)
 
-            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
+            leaderboardMsg +=   boldstr + str(i+1) + '. '
 
             if aUser:
                 leaderboardMsg += str(aUser.display_name)
