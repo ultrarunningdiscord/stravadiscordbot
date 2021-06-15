@@ -47,65 +47,7 @@ commandList.append(_fullleaderboard)
 async def _fullvert(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embedMesg = []
-    embed = discord.Embed()
-    embed = discord.Embed(color=0xff0000)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
-    embedMesg.append(embed)
-    embed = discord.Embed()
-    embed = discord.Embed(color=0xff0000)
-    leaderboardJSON = await botGlobals.loadLeaderboard()
-    if leaderboardJSON is not None:
-        leaderboardMsg = ""
-        leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
-        linesPerEmbed = 20
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            boldstr = ""
-            if i < 10:
-                boldstr = "**"
-            athleteId = rankedUser['athlete_id']
-            discordId = await userData.retrieveDiscordID(athleteId)
-            aUser = None
-            if discordId:
-                aUser = await ctx.bot.fetch_user(discordId)
-
-            leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
-                                rankedUser['athlete_firstname'] + ' ' + \
-                                rankedUser['athlete_lastname']
-            if aUser:
-                leaderboardMsg += ' [' + str(aUser.display_name) + ']'
-
-            leaderboardMsg +=   ' - ' + \
-                                "{:,}".format(round(rankedUser['elev_gain'], 2)) + \
-                                ' m (' + \
-                                metersToFeet(rankedUser['elev_gain']) + \
-                                ')' + ' : '
-            leaderboardMsg +=   ' - ' + \
-                                "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
-                                ' km (' + \
-                                metersToMiles(rankedUser['distance']) + \
-                                ')' + boldstr + '\n'
-            if linesPerEmbed <= 0:
-                # Store current
-                embed.description = leaderboardMsg
-                embedMesg.append(embed)
-
-                # Start a new embed message
-                embed = discord.Embed()
-                embed = discord.Embed(color=0x00ff00)
-                linesPerEmbed = 20
-                leaderboardMsg = ''
-            else:
-                linesPerEmbed -= 1
-
-        if leaderboardMsg:
-            embed.description = leaderboardMsg
-            embedMesg.append(embed)
-
-        for e in embedMesg:
-            await currChannel.send(embed=e)
-    else:
-        await currChannel.send('Failed to load leaderboard. Please try again later.')
+    await cmdImpl.vertleaderboardImpl(channel=currChannel, bot=ctx.bot)
 commandList.append(_fullvert)
 
 
@@ -386,48 +328,7 @@ commandList.append(strava)
 async def _vertleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embed = discord.Embed()
-    embed = discord.Embed(color=0xff0000)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Vert Leaderboard:**\n"
-    leaderboardJSON = await botGlobals.loadLeaderboard()
-    if leaderboardJSON is not None:
-        leaderboardMsg = ""
-        leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            if i < 30:
-                boldstr = ""
-                if i < 10:
-                    boldstr = "**"
-                athleteId = rankedUser['athlete_id']
-                discordId = await userData.retrieveDiscordID(athleteId)
-                aUser = None
-                if discordId:
-                    aUser = await ctx.bot.fetch_user(discordId)
+    await cmdImpl.vertleaderboardImpl(channel=currChannel, bot=ctx.bot, entries=30)
 
-                leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
-                                    rankedUser['athlete_firstname'] + ' ' + \
-                                    rankedUser['athlete_lastname']
-                if aUser:
-                    leaderboardMsg += ' [' + str(aUser.display_name) + ']'
-
-                leaderboardMsg +=   ': ' + \
-                                    "{:,}".format(round(rankedUser['elev_gain'], None)) + \
-                                    'm (' + \
-                                    metersToFeet(rankedUser['elev_gain'], roundTo=None) + \
-                                    ')'
-
-                leaderboardMsg +=   ' over ' + \
-                                    "{:,}".format(round(rankedUser['distance']/1000, None)) + \
-                                    'km (' + \
-                                    metersToMiles(meters=rankedUser['distance'], showUnit=False, roundTo=None) + \
-                                    'mi)' + boldstr + '\n'
-
-
-
-        embed.description = leaderboardMsg
-
-        await currChannel.send(embed=embed)
-    else:
-        await currChannel.send('Failed to load leaderboard. Please try again later.')
 commandList.append(_vertleaderboard)
 
