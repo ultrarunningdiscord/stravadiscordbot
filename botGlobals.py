@@ -15,6 +15,7 @@ admin = [302457136959586304]
 botToken = None
 cacheTimeout = 3600
 debug = False
+debugInit = ''
 leaderThread = None
 mongoClient = None
 mongoDb = None
@@ -134,15 +135,19 @@ def init():
         global mongoClient, mongoDb
         global userDataFile
         global userDataBase
+        global debugInit
         try:
             mSite = 'mongodb+srv://' + MONGO_USER + ':' + MONGO_PASSWD + '@' + MONGO_DB_NAME
             mSite += '.mongodb.net/' + userDataFile + '?retryWrites=true&w=majority'
             mongoClient = motor.motor_tornado.MotorClient(mSite)
             if mongoClient is not None:
                 mongoDb = mongoClient[userDataFile]
+            else:
+                debugInit += 'Failed to load mongo db\n'
 
         except Exception as e:
             print(e)
+            debugInit += e
 
 
 
