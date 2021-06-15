@@ -74,6 +74,23 @@ async def leaderboardImpl(channel, bot, entries=None):
 
     return leaderboardJSON
 
+async def registerCacheImpl(channel, bot, discordId):
+    leaderboard = await leaderboardImpl(channel=channel, bot=bot)
+    # Display information for the user to execute the command to associate the strava id w/ discord id
+    mesg = '\n\n'
+    mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'
+    mesg += '!register <rank>\n'
+    mesg += 'If you make a mistake, just use !register erase```'
+    await channel.send(mesg)
+
+    # Cache the leaderboard for 10 minutes
+    leaderboardJSON = await botGlobals.loadLeaderboard()
+    # Reset the cache
+    reset = await userData.resetLeaderBoardCache(lbJson=leaderboardJSON, discordId=discordId)
+    if not reset:
+        channel.send('Failed to cache the leaderboard.')
+
+
 async def vertleaderboardImpl(channel, bot, entries=None):
     linesPerEmbed = 20
 
@@ -89,6 +106,7 @@ async def vertleaderboardImpl(channel, bot, entries=None):
 
     if leaderboardJSON is not None:
         leaderboardMsg = ""
+        leaderboardJSON['data'].sort(key=lambda x: x['elev_gain'], reverse=True)
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             if entries is not None:
                 if i >= entries:
