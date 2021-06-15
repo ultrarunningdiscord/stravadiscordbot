@@ -2,6 +2,7 @@ import discord
 
 from conversions import metersToMiles
 import botGlobals
+import userData
 
 # Helper implementations for various bot commands to facilitate simple re-use and maintenance
 async def leaderboardImpl(channel, bot, entries=None):
@@ -28,16 +29,18 @@ async def leaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            discordId = await botGlobals.retrieveDiscordID(athleteId)
+            discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
-            if discordId:
+            if discordId and bot is not None:
                 aUser = await bot.fetch_user(discordId)
 
-            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. ' + \
-                                rankedUser['athlete_firstname'] + ' ' + \
-                                rankedUser['athlete_lastname']
+            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
+
             if aUser:
-                leaderboardMsg += ' [' + str(aUser.display_name) + ']'
+                leaderboardMsg += str(aUser.display_name)
+            else:
+                leaderboardMsg += rankedUser['athlete_firstname'] + ' ' + \
+                                  rankedUser['athlete_lastname']
 
             leaderboardMsg +=   ' - ' + \
                                 "{:,}".format(round(rankedUser['distance']/1000, 2)) + \
@@ -62,8 +65,11 @@ async def leaderboardImpl(channel, bot, entries=None):
         if leaderboardMsg:
             embed.description = leaderboardMsg
             embedMesg.append(embed)
-
-        for e in embedMesg:
-            await channel.send(embed=e)
+        if channel is not None:
+            for e in embedMesg:
+                await channel.send(embed=e)
     else:
-        await channel.send('Failed to load leaderboard. Please try again later.')
+        if channel is not None:
+            await channel.send('Failed to load leaderboard. Please try again later.')
+
+    return leaderboardJSON

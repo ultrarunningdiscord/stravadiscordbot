@@ -12,6 +12,7 @@ from discord.ext import commands
 import botGlobals
 import cmdImpl
 import help
+import userData
 
 
 # Commands for the bot...just make sure to append to the commandList to rgister the command
@@ -60,7 +61,7 @@ async def _fullvert(ctx, *args):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            discordId = await botGlobals.retrieveDiscordID(athleteId)
+            discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
             if discordId:
                 aUser = await ctx.bot.fetch_user(discordId)
@@ -219,36 +220,54 @@ async def _register(ctx, *args):
     #                                     the discord user and prints out confirmation
     # !register erase - Removes the current discord id from any strava id connection
     # !register erase <number of lb> - Admin only command that removes that discord id from that strava athlete id
-    user = ctx.message.author.id
+    user = ctx.message.author
     currChannel = ctx.message.channel
+    dmChannel = user.dm_channel
+    if dmChannel is None:
+        dmChannel = await user.create_dm()
 
     if (len(args) == 0):
         # Open DM channel and display leaderboard w/ help on !register <rank>
-        dmChannel = user.dm_channel
-        if dmChannel is None:
-            dmChannel = await user.create_dm()
 
 
-        pass
+        leaderboard = await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+        # Display information for the user to execute the command to associate the strava id w/ discord id
+        mesg = '\n\n'
+        mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'
+        mesg += '!register <rank>\n'
+        mesg += 'If you make a mistake, just use !register erase```'
+        await dmChannel.send(mesg)
 
-    # TODO Disable until strava API auth is figured out
-    print('# ALS - register username w/ strava')
+        # Cache the leaderboard for 10 minutes
+        #uData = userData.getData(user=ctx.message.author.id)
 
-    access_token = botGlobals.getNewToken()
-    authorizePage = 'https://www.strava.com/oauth/authorize?client_id='+botGlobals.STRAVACLIENTID
-    authorizePage += '&response_type=code&redirect_uri=http://localhost/exchange_token&approval_prompt=force&scope=read'
+    elif (len(args) == 1):
+        if args[0].isdigit():
+            rankPos = int(args[0])
+            # Check the cache to see if its valid
 
-    stravaAuthHeader = {'Content-Type': 'application/json',
-                        'Authorization': 'Bearer {}'.format(access_token)}
-    stravaResult = requests.get('https://www.strava.com/api/v3/athlete/',
-                                headers=stravaAuthHeader)
-    if stravaResult.status_code == 200:
-        stravaAthleteId = json.loads(stravaResult.content)['id']
-        await botGlobals.registerStravaID(user=user, stravaId=stravaAthleteId)
-        await currChannel.send('Successfully registered Strava ID with Discord ID')
-    else:
-        await currChannel.send('Failed to register Strava ID with Discord ID')
-    pass
+            # Set the strava ID
+            stravaId = None
+            leaderboardJSON = await botGlobals.loadLeaderboard()
+            for rank, rankedUser in enumerate(leaderboardJSON['data']):
+                if rank == (rankPos - 1):
+                    # This is our athlete
+                    print('# ALS - this athlete')
+                    stravaId = rankedUser['athlete_id']
+                    break
+
+            if stravaId is not None:
+                dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId)
+
+                if dataSet:
+                    # Display leaderboard for last check
+                    # Remove cache and cache expiration
+                    mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
+                    mesg += '       !register erase then !register to restart registration process.'
+                    await dmChannel.send(mesg)
+            #await botGlobals.registerStravaID(user=ctx.message.author.id, stravaId=1234)
+            # Get leaderboard with the strava ID
+            #leaderboard = await cmdImpl.leaderboardImpl(channel=None, bot=None)
 
 commandList.append(_register)
 
@@ -329,7 +348,7 @@ async def _vertleaderboard(ctx, *args):
                 if i < 10:
                     boldstr = "**"
                 athleteId = rankedUser['athlete_id']
-                discordId = await botGlobals.retrieveDiscordID(athleteId)
+                discordId = await userData.retrieveDiscordID(athleteId)
                 aUser = None
                 if discordId:
                     aUser = await ctx.bot.fetch_user(discordId)

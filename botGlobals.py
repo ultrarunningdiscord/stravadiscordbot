@@ -1,5 +1,6 @@
 from datetime import datetime, date, timedelta
 import json
+import motor.motor_tornado
 import os
 import pickle
 import redis
@@ -10,28 +11,36 @@ import time
 
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
-
+admin = [302457136959586304]
+botToken = None
+cacheTimeout = 3600
 debug = False
+leaderThread = None
+mongoClient = None
+mongoDb = None
+MONGO_DB_NAME = None
+MONGO_USER = None
+MONGO_PASSWD = None
 running = True
-userDataFile = 'stravaBot.userData'
-userData = {}
 redis_conn = None
+registrationData = 'registrations'
+resolveTime = '23:59'
 STRAVACLUB = ''
 STRAVACLUB_PRETTYNAME = ''
 STRAVAREFRESHTOKEN = ''
 STRAVATOKEN = ''
 STRAVACLIENTID = ''
 STRAVASECRET = ''
-botToken = None
+session = None
 stravaToken = None
 stravaTokenExpire = None
 stravaPublicHeader = None
-admin = [302457136959586304]
-session = None
-cacheTimeout = 3600
-initialFree = 10000.0
-resolveTime = '23:59'
-leaderThread = None
+userDataFile = 'stravaBot_userData'
+
+
+
+
+
 
 def init():
     global redis_conn
@@ -101,7 +110,39 @@ def init():
     if botToken is None:
         print("DISCORDTOKEN variable not set. Unable to launch bot.")
 
+    # Grab the mongoDB user name from MONGO_USER environment variable
+    failedMongo = False
+    global MONGO_USER
+    MONGO_USER = os.environ.get('MONGO_USER')
+    if MONGO_USER is None:
+        print("MONGO_USER variable not set. Unable to connect to database.")
+        failedMongo = True
 
+
+    global MONGO_PASSWD
+    MONGO_PASSWD = os.environ.get('MONGO_PASSWD')
+    if MONGO_PASSWD is None:
+        print("MONGO_PASSWD variable not set. Unable to connect to database.")
+
+    global MONGO_DB_NAME
+    MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME')
+    if MONGO_DB_NAME is None:
+        print("MONGO_DB_NAME variable not set. Unable to connect to database.")
+
+    if not failedMongo:
+
+        global mongoClient, mongoDb
+        global userDataFile
+        global userDataBase
+        try:
+            mSite = 'mongodb+srv://' + MONGO_USER + ':' + MONGO_PASSWD + '@' + MONGO_DB_NAME
+            mSite += '.mongodb.net/' + userDataFile + '?retryWrites=true&w=majority'
+            mongoClient = motor.motor_tornado.MotorClient(mSite)
+            if mongoClient is not None:
+                mongoDb = mongoClient[userDataFile]
+
+        except Exception as e:
+            print(e)
 
 
 
@@ -200,27 +241,22 @@ async def writeData():
     #     pass
 
 async def registerStravaID(user, stravaId):
-    global userData
-    # Register the user with their strava ID for leaderboard, etc.
-    user = str(user) # Convert number id to string for easy lookup
-    if user not in userData:
-        userData[user] = {'stravaId': stravaId}
-    else:
-        data = userData[user]
-        data['stravaId'] = stravaId
-        userData[user] = data
+    global userDataBase, mongoClient, userDataCollection
+    user = str(user)
+    if userDataBase is not None:
+        #data = userDataBase[userDataCollection]
+        collectionList = userDataBase.list_collection_names()
+        uData = None
+        if userDataCollection in collectionList:
 
-    await writeData()
 
-async def retrieveDiscordID(stravaId):
-    global userData
-    for u,d in userData.items():
-        if 'stravaId' in d:
-            id = d['stravaId']
-            if id == stravaId:
-                return u
+            uData = userDataBase.find(userDataCollection)
+        else:
+            # Create for the first time
+            pass
+            #result = await db.collection.insert_one(document)
 
-    return None
+
 
 # Determine if we have access to the Strava API
 async def checkStravaAPI(ctx=None):
