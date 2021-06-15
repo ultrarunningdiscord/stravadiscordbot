@@ -24,11 +24,14 @@ commandList = []
 async def debug(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
+    dmChannel = user.dm_channel
+    if dmChannel is None:
+        dmChannel = await user.create_dm()
     embed = discord.Embed()
     embed = discord.Embed(color=0x00ff00)
     embed.title = f"**DEBUG:**\n"
-    embed.description = "I am alive and well."
-    await currChannel.send(embed=embed)
+    embed.description = botGlobals.debugInit
+    await dmChannel.send(embed=embed)
 
 commandList.append(debug)
 
