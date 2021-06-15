@@ -52,3 +52,14 @@ async def retrieveDiscordID(stravaId):
 
 
     return discordId
+
+async def deleteDiscordID(discordId):
+    # Delete the database registration entry
+    collectionList = await botGlobals.mongoDb.list_collection_names()
+    if botGlobals.registrationData in collectionList:
+        # Search the collection
+
+        collection = botGlobals.mongoDb[botGlobals.registrationData]
+        result = await collection.delete_one({'id': discordId})
+
+    return result

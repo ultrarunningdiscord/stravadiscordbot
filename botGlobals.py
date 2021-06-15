@@ -219,45 +219,6 @@ async def loadLeaderboard():
 
     return leaderboardJSON
 
-async def getUserData():
-    global userData
-    return userData
-
-async def writeData():
-    global redis_conn
-    global userDataFile
-    global userData
-    try:
-        redis_conn.set(userDataFile, json.dumps(userData))
-    except Exception as e:
-        print('# Failed to access redis-server in writeData')
-
-    # File system approach
-    # try:
-    #     bFileDesc = open(botGlobals.userDataFile, "w")
-    #     json.dump(userData, bFileDesc)
-    #     bFileDesc.close()
-    # except Exception as e:
-    #     pass
-
-async def registerStravaID(user, stravaId):
-    global userDataBase, mongoClient, userDataCollection
-    user = str(user)
-    if userDataBase is not None:
-        #data = userDataBase[userDataCollection]
-        collectionList = userDataBase.list_collection_names()
-        uData = None
-        if userDataCollection in collectionList:
-
-
-            uData = userDataBase.find(userDataCollection)
-        else:
-            # Create for the first time
-            pass
-            #result = await db.collection.insert_one(document)
-
-
-
 # Determine if we have access to the Strava API
 async def checkStravaAPI(ctx=None):
     stravaAccess = False
