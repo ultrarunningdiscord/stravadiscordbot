@@ -270,21 +270,27 @@ async def _register(ctx, *args):
                         wrongRank = False
                         break
 
-            if stravaId is not None:
-                # Delete any potential current registration
-                result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
-                dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId)
+                if stravaId is not None:
+                    # Delete any potential current registration
+                    result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
 
-                if dataSet:
-                    # Display leaderboard for last check
-                    await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
-                    # Remove cache and cache expiration
-                    mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
-                    mesg += '       !register erase then !register to restart registration process.'
-                    await dmChannel.send(mesg)
+                    dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId)
+
+                    if dataSet:
+                        # Display leaderboard for last check
+                        await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                        # Remove cache and cache expiration
+                        mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
+                        mesg += '       !register erase then !register to restart registration process.'
+                        await dmChannel.send(mesg)
+                    else:
+                        await dmChannel.send('Failed to set registration for strava ID: '+str(stravaId))
+                else:
+                    if wrongRank:
+                        await dmChannel.send('The rank you entered does not exist.')
             else:
-                if wrongRank:
-                    await dmChannel.send('The rank you entered does not exist.')
+                # Failed to load leaderboard
+                await dmChannel.send('Failed to load leaderboard try again later.')
 
 
     elif (len(args) == 2):
