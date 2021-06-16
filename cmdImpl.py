@@ -41,9 +41,8 @@ async def leaderboardImpl(channel, bot, entries=None):
                         "stravaId": athleteId,
                         "display_name": aUser.display_name,
                         "avatar_url": aUser.avatar_url,
-
                     }
-                    await userData.setData(botGlobals.registrationData, updated)
+                    userData.setData(botGlobals.registrationData, updated)
                 except:
                     pass
 
