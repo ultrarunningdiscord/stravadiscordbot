@@ -36,8 +36,7 @@ async def leaderboardImpl(channel, bot, entries=None):
                 aUser = await bot.fetch_user(discordId)
                 try:
                     updated = {
-                        "_id": discordId,
-                        "discordId": discordId,
+                        "id": discordId,
                         "stravaId": athleteId,
                         "display_name": aUser.display_name,
                         "avatar_url": aUser.avatar_url,
