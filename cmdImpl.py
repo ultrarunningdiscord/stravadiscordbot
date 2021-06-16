@@ -29,10 +29,23 @@ async def leaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
+            
             discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
             if discordId and bot is not None:
                 aUser = await bot.fetch_user(discordId)
+                try:
+                    updated = {
+                        "_id": discordId,
+                        "discordId": discordId,
+                        "stravaId": athleteId,
+                        "display_name": aUser.display_name,
+                        "avatar_url": aUser.avatar_url,
+
+                    }
+                    await userData.setData(botGlobals.registrationData, updated)
+                except:
+                    pass
 
             leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
 
