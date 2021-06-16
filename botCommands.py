@@ -22,12 +22,11 @@ commandList = []
 async def _map(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    embed = discord.Embed()
-    embed.color = 0x0099ff
+    embed = discord.Embed(color=0x0099ff)
     embed.title = 'Ultrarunning Discord Server Virtual Race Map'
     embed.url = 'https://virtual-race-map.netlify.app'
     # embed.description ='Virtual race map'
-    embed.image = 'https://virtual-race-map.netlify.app/img/thumbnail.png'
+    embed.set_image(url='https://virtual-race-map.netlify.app/img/thumbnail.png')
     
     await currChannel.send(embed=embed)
 commandList.append(_map)
