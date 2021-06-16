@@ -30,6 +30,8 @@ async def race_map(ctx, *args):
     embed.image('https://virtual-race-map.netlify.app/img/thumbnail.png')
     
     await currChannel.send(embed=embed)
+commandList.append(race_map)
+
 
 @commands.command()
 async def debug(ctx, *args):
