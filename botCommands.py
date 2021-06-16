@@ -18,7 +18,18 @@ import userData
 # Commands for the bot...just make sure to append to the commandList to rgister the command
 commandList = []
 
-
+@commands.command(name='map', aliases=('racemap','virtualracemap'))
+async def race_map(ctx, *args):
+    user = ctx.message.author
+    currChannel = ctx.message.channel
+    embed = discord.Embed()
+    embed.color('#0099ff')
+    embed.title('Ultrarunning Discord Server Virtual Race Map')
+    embed.url('https://virtual-race-map.netlify.app')
+    # embed.description('Virtual race map')
+    embed.image('https://virtual-race-map.netlify.app/img/thumbnail.png')
+    
+    await currChannel.send(embed=embed)
 
 @commands.command()
 async def debug(ctx, *args):
