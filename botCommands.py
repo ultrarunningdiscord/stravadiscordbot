@@ -19,7 +19,7 @@ import userData
 commandList = []
 
 @commands.command(name='map', aliases=('racemap','virtualracemap'))
-async def race_map(ctx, *args):
+async def _map(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
     embed = discord.Embed()
@@ -30,7 +30,7 @@ async def race_map(ctx, *args):
     embed.image('https://virtual-race-map.netlify.app/img/thumbnail.png')
     
     await currChannel.send(embed=embed)
-commandList.append(race_map)
+commandList.append(_map)
 
 
 @commands.command()
