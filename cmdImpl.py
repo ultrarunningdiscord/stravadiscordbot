@@ -29,12 +29,10 @@ async def leaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            
             discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
-            if discordId is not None and bot is not None:
+            if discordId and bot is not None:
                 aUser = await bot.fetch_user(discordId)
-
 
             leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
 
@@ -58,7 +56,7 @@ async def leaderboardImpl(channel, bot, entries=None):
 
                     # Start a new embed message
                     embed = discord.Embed()
-                    embed = discord.Embed(color=0x0000ff)
+                    embed = discord.Embed(color=0x00ff00)
                     linesPerEmbed = 20
                     leaderboardMsg = ''
                 else:
