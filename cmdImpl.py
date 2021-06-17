@@ -29,7 +29,7 @@ async def leaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            
+
             discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
             if discordId is not None and bot is not None:
@@ -100,6 +100,7 @@ async def updateImpl(bot):
     if leaderboardJSON is not None:
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             athleteId = rankedUser['athlete_id']
+
             discordId = await userData.retrieveDiscordID(athleteId)
             if discordId is not None:
                 user = await bot.fetch_user(discordId)
@@ -111,6 +112,7 @@ async def updateImpl(bot):
                     #     if m.id == user.id:
                     #         nickName = m.nick
                     #         break
+
                     dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
                                                              displayName=user.display_name,
                                                              avatarURL=user.avatar_url)

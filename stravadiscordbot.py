@@ -6,10 +6,10 @@ from threading import Event
 import discord
 from discord.ext.commands import Bot
 
-import dataUpdater
-import distanceLeader
+
 import botGlobals
 import botCommands
+import dataUpdater
 import help
 
 
@@ -18,8 +18,8 @@ import help
 
 
 BOT_PREFIX = ("!")
-intents = discord.Intents.default()
-intents.members = True
+# intents = discord.Intents.default()
+# intents.members = True
 stravaBot = Bot(command_prefix=BOT_PREFIX)#, intents=intents)
 
 # Help command isolated to its own file
@@ -43,12 +43,9 @@ def main():
     try:
         stravaBot.run(botGlobals.botToken)
 
-
     finally:
-        botGlobals.leaderThread.cancel()
-        dataUpdater.updateDB.cancel()
-
         #m_loop.run_until_complete(globals.session.close())
+        dataUpdater.updateDB.cancel()
         pass
 
 if __name__ == '__main__':

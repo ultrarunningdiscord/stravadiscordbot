@@ -11,10 +11,11 @@ import time
 
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
-admin = [302457136959586304]
+admin = [302457136959586304, 267777327885320193, 498195545228312578]
 bot = None
 botToken = None
 cacheTimeout = 3600
+cacheData = 'userCache'
 debug = False
 debugInit = ''
 leaderThread = None
@@ -198,7 +199,7 @@ def getToken():
                 stravaToken, stravaTokenExpire = refresh_token()
             else:
                 # Convert to datetime object
-                stravaTokenExpire = pickle.dumps(stravaTokenExpire)
+                stravaTokenExpire = pickle.loads(stravaTokenExpire)
         except:
             # If we except here, its due to a none byte error against decode
             # TODO there might be a better way to handle this
@@ -261,7 +262,6 @@ async def loadURL(url):
     response = json.loads(response)
 
     return response
-
 
 
 
