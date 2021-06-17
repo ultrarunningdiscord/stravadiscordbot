@@ -12,6 +12,7 @@ import time
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
 admin = [302457136959586304]
+bot = None
 botToken = None
 cacheTimeout = 3600
 cacheData = 'userCache'
@@ -26,7 +27,8 @@ MONGO_PASSWD = None
 running = True
 redis_conn = None
 registrationData = 'registrations'
-resolveTime = '23:59'
+resolveTime = 23
+resolveDay = 6 # Sunday for datetime object
 STRAVACLUB = ''
 STRAVACLUB_PRETTYNAME = ''
 STRAVAREFRESHTOKEN = ''
@@ -37,6 +39,7 @@ session = None
 stravaToken = None
 stravaTokenExpire = None
 stravaPublicHeader = None
+updateDBTime = 23
 userDataFile = 'stravaBot_userData'
 
 
@@ -44,7 +47,9 @@ userDataFile = 'stravaBot_userData'
 
 
 
-def init():
+def init(stravaBot):
+    global bot
+    bot = stravaBot
     global redis_conn
     try:
         redis_conn = redis.Redis(host='localhost', port=6379, db=0)

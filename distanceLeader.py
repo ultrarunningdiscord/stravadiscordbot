@@ -1,47 +1,16 @@
-import asyncio
-import discord
-import schedule
-import threading
-import time
-
-
-from threading import Timer, Thread, Event
+from discord.ext import commands, tasks
+from datetime import datetime, timedelta
 
 import botGlobals
+import cmdImpl
+
+@tasks.loop(minutes=60)
+async def crownDistanceLeaders():
+    if datetime.now().hour == botGlobals.resolveTime and datetime.now().weekday() == botGlobals.resolveDay:
+        print('# ALS - crown leaders')
 
 
-class DistanceLeader(Thread):
-    def __init__(self, event):
-        print('# ALS - DistanceLeader __init__')
-        Thread.__init__(self)
-        self.finished = event
-        schedule.every().day.at(botGlobals.resolveTime).do(self.crownDistanceLeader)
-        #schedule.every(30).seconds.do(self.crownDistanceLeader)
-        self.loop = None
-
-    def closeLoop(self):
-        if self.loop is not None:
-            self.loop.close()
-            self.loop = None
-
-    def cancel(self):
-        #Terminate this thread
-        # if self.loop is not None:
-        #     self.closeLoop()
-
-        self.finished.set()
-    def crownDistanceLeader(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-
-        self.loop.run_until_complete(self.findLeader())
-        self.loop.close()
-
-    async def findLeader(self):
-        leaderboardJSON = await botGlobals.loadLeaderboard()
-        print('# ALS - leaderboard '+str(leaderboardJSON))
-
-    def run(self):
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
+@crownDistanceLeaders.before_loop
+async def before_my_task():
+    if botGlobals.bot is not None:
+        await botGlobals.bot.wait_until_ready()
