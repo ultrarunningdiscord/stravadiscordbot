@@ -3,7 +3,6 @@ import asyncio
 
 from threading import Event
 
-import discord
 from discord.ext.commands import Bot
 
 import distanceLeader
