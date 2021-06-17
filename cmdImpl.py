@@ -88,7 +88,36 @@ async def registerCacheImpl(channel, bot, discordId):
     # Reset the cache
     reset = await userData.resetLeaderBoardCache(lbJson=leaderboardJSON, discordId=discordId)
     if not reset:
-        channel.send('Failed to cache the leaderboard.')
+        await channel.send('Failed to cache the leaderboard.')
+
+async def updateImpl(bot):
+    failed = False
+    # Update the registration database with additional DISCORD info
+    leaderboardJSON = await botGlobals.loadLeaderboard()
+
+    if leaderboardJSON is not None:
+        for i, rankedUser in enumerate(leaderboardJSON['data']):
+            athleteId = rankedUser['athlete_id']
+
+            discordId = await userData.retrieveDiscordID(athleteId)
+            if discordId is not None:
+                user = await bot.fetch_user(discordId)
+                # Delete the data
+                result = await userData.deleteDiscordID(discordId=user.id)
+                if result is not None:
+                    nickName = None
+                    # for m in bot.get_all_members():
+                    #     if m.id == user.id:
+                    #         nickName = m.nick
+                    #         break
+
+                    dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
+                                                             displayName=user.display_name,
+                                                             avatarURL=user.avatar_url)
+                else:
+                    failed = True
+
+    return failed
 
 
 async def vertleaderboardImpl(channel, bot, entries=None):
