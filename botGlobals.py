@@ -11,9 +11,11 @@ import time
 
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
-admin = [302457136959586304]
+admin = [302457136959586304, 267777327885320193, 498195545228312578]
+bot = None
 botToken = None
 cacheTimeout = 3600
+cacheData = 'userCache'
 debug = False
 debugInit = ''
 leaderThread = None
@@ -25,7 +27,8 @@ MONGO_PASSWD = None
 running = True
 redis_conn = None
 registrationData = 'registrations'
-resolveTime = '23:59'
+resolveTime = 23
+resolveDay = 6 # Sunday for datetime object
 STRAVACLUB = ''
 STRAVACLUB_PRETTYNAME = ''
 STRAVAREFRESHTOKEN = ''
@@ -36,6 +39,7 @@ session = None
 stravaToken = None
 stravaTokenExpire = None
 stravaPublicHeader = None
+updateDBTime = 23
 userDataFile = 'stravaBot_userData'
 
 
@@ -43,7 +47,9 @@ userDataFile = 'stravaBot_userData'
 
 
 
-def init():
+def init(stravaBot):
+    global bot
+    bot = stravaBot
     global redis_conn
     try:
         redis_conn = redis.Redis(host='localhost', port=6379, db=0)
@@ -193,7 +199,7 @@ def getToken():
                 stravaToken, stravaTokenExpire = refresh_token()
             else:
                 # Convert to datetime object
-                stravaTokenExpire = pickle.dumps(stravaTokenExpire)
+                stravaTokenExpire = pickle.loads(stravaTokenExpire)
         except:
             # If we except here, its due to a none byte error against decode
             # TODO there might be a better way to handle this
@@ -256,7 +262,6 @@ async def loadURL(url):
     response = json.loads(response)
 
     return response
-
 
 
 
