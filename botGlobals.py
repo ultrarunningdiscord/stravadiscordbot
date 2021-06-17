@@ -14,7 +14,6 @@ import time
 admin = [302457136959586304]
 botToken = None
 cacheTimeout = 3600
-cacheData = 'userCache'
 debug = False
 debugInit = ''
 leaderThread = None
@@ -194,7 +193,7 @@ def getToken():
                 stravaToken, stravaTokenExpire = refresh_token()
             else:
                 # Convert to datetime object
-                stravaTokenExpire = pickle.loads(stravaTokenExpire)
+                stravaTokenExpire = pickle.dumps(stravaTokenExpire)
         except:
             # If we except here, its due to a none byte error against decode
             # TODO there might be a better way to handle this

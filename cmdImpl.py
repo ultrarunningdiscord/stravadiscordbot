@@ -29,12 +29,10 @@ async def leaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            
             discordId = await userData.retrieveDiscordID(athleteId)
             aUser = None
-            if discordId is not None and bot is not None:
+            if discordId and bot is not None:
                 aUser = await bot.fetch_user(discordId)
-
 
             leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
 
@@ -58,7 +56,7 @@ async def leaderboardImpl(channel, bot, entries=None):
 
                     # Start a new embed message
                     embed = discord.Embed()
-                    embed = discord.Embed(color=0x0000ff)
+                    embed = discord.Embed(color=0x00ff00)
                     linesPerEmbed = 20
                     leaderboardMsg = ''
                 else:
@@ -90,36 +88,7 @@ async def registerCacheImpl(channel, bot, discordId):
     # Reset the cache
     reset = await userData.resetLeaderBoardCache(lbJson=leaderboardJSON, discordId=discordId)
     if not reset:
-        await channel.send('Failed to cache the leaderboard.')
-
-async def updateImpl(bot):
-    failed = False
-    # Update the registration database with additional DISCORD info
-    leaderboardJSON = await botGlobals.loadLeaderboard()
-
-    if leaderboardJSON is not None:
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            athleteId = rankedUser['athlete_id']
-
-            discordId = await userData.retrieveDiscordID(athleteId)
-            if discordId is not None:
-                user = await bot.fetch_user(discordId)
-                # Delete the data
-                result = await userData.deleteDiscordID(discordId=user.id)
-                if result is not None:
-                    nickName = None
-                    for m in bot.get_all_members():
-                        if m.id == user.id:
-                            nickName = m.nick
-                            break
-
-                    dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
-                                                             displayName=user.display_name,
-                                                             avatarURL=user.avatar_url)
-                else:
-                    failed = True
-
-    return failed
+        channel.send('Failed to cache the leaderboard.')
 
 
 async def vertleaderboardImpl(channel, bot, entries=None):
