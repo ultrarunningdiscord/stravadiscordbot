@@ -108,10 +108,10 @@ async def updateImpl(bot):
                 result = await userData.deleteDiscordID(discordId=user.id)
                 if result is not None:
                     nickName = None
-                    for m in bot.get_all_members():
-                        if m.id == user.id:
-                            nickName = m.nick
-                            break
+                    # for m in bot.get_all_members():
+                    #     if m.id == user.id:
+                    #         nickName = m.nick
+                    #         break
 
                     dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
                                                              displayName=user.display_name,
