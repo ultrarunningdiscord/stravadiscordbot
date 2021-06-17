@@ -16,8 +16,8 @@ import help
 
 
 BOT_PREFIX = ("!")
-intents = discord.Intents.default()
-intents.members = True
+# intents = discord.Intents.default()
+# intents.members = True
 stravaBot = Bot(command_prefix=BOT_PREFIX)#, intents=intents)
 
 # Help command isolated to its own file
