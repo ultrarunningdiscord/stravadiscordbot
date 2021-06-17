@@ -173,18 +173,7 @@ async def _register(ctx, *args):
 
     if (len(args) == 0):
         # Open DM channel and display leaderboard w/ help on !register <rank>
-
-
-        leaderboard = await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
-        # Display information for the user to execute the command to associate the strava id w/ discord id
-        mesg = '\n\n'
-        mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'
-        mesg += '!register <rank>\n'
-        mesg += 'If you make a mistake, just use !register erase```'
-        await dmChannel.send(mesg)
-
-        # Cache the leaderboard for 10 minutes
-        #uData = userData.getData(user=ctx.message.author.id)
+        await cmdImpl.registerCacheImpl(channel=dmChannel, bot=ctx.bot, discordId=ctx.message.author.id)
 
     elif (len(args) == 1):
         if args[0] == 'erase':
@@ -202,41 +191,50 @@ async def _register(ctx, *args):
         elif args[0].isdigit():
             rankPos = int(args[0])
             # Check the cache to see if its valid
+            checkCache = await userData.checkLeaderBoardCache(discordId=ctx.message.author.id)
+            if checkCache is not None:
+                # Set the strava ID
+                stravaId = None
+                wrongRank = True
+                # Use the cached leaderboard
+                leaderboardJSON = checkCache
+                if leaderboardJSON is not None:
+                    for rank, rankedUser in enumerate(leaderboardJSON['data']):
+                        if rank == (rankPos - 1):
+                            # This is our athlete
+                            stravaId = rankedUser['athlete_id']
+                            wrongRank = False
+                            break
 
-            # Set the strava ID
-            stravaId = None
-            wrongRank = True
-            leaderboardJSON = await botGlobals.loadLeaderboard()
-            if leaderboardJSON is not None:
-                for rank, rankedUser in enumerate(leaderboardJSON['data']):
-                    if rank == (rankPos - 1):
-                        # This is our athlete
-                        stravaId = rankedUser['athlete_id']
-                        wrongRank = False
-                        break
+                    if stravaId is not None:
+                        # Delete any potential current registration
+                        result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
 
-                if stravaId is not None:
-                    # Delete any potential current registration
-                    result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
+                        dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId,
+                                                                 displayName=ctx.message.author.display_name,
+                                                                 avatarURL=ctx.message.author.avatar_url)
 
-                    dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId)
-
-                    if dataSet:
-                        # Display leaderboard for last check
-                        await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
-                        # Remove cache and cache expiration
-                        mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
-                        mesg += '       !register erase then !register to restart registration process.'
-                        await dmChannel.send(mesg)
+                        if dataSet:
+                            # Display leaderboard for last check
+                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                            # Remove cache and cache expiration
+                            mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
+                            mesg += '       !register erase then !register to restart registration process.'
+                            await dmChannel.send(mesg)
+                        else:
+                            await dmChannel.send('Failed to set registration for strava ID: '+str(stravaId))
                     else:
-                        await dmChannel.send('Failed to set registration for strava ID: '+str(stravaId))
-                else:
-                    if wrongRank:
-                        await dmChannel.send('The rank you entered does not exist.')
-            else:
-                # Failed to load leaderboard
-                await dmChannel.send('Failed to load leaderboard try again later.')
+                        if wrongRank:
+                            await dmChannel.send('The rank you entered does not exist.')
 
+
+                else:
+                    # Failed to load leaderboard
+                    await dmChannel.send('Failed to load leaderboard try again later.')
+            else:
+                # Cache is invalid display leaderboard and re-cache
+                await cmdImpl.registerCacheImpl(channel=dmChannel, bot=ctx.bot, discordId=ctx.message.author.id)
+                await dmChannel.send('```Please try again as the leaderboard may have changed and type !register <rank>.```')
 
     elif (len(args) == 2):
         admin = await botGlobals.checkAdmin(ctx=ctx)
@@ -323,6 +321,28 @@ async def strava(ctx, *args):
     await currChannel.send(embed=embed)
 
 commandList.append(strava)
+
+@commands.command()
+async def update(ctx, *args):
+    # Update the Mongo DB data for avatar_url and display_name
+    # ADMIN ONLY
+    user = ctx.message.author
+    dmChannel = user.dm_channel
+    if dmChannel is None:
+        dmChannel = await user.create_dm()
+
+
+    admin = await botGlobals.checkAdmin(ctx=ctx)
+    if admin:
+        failed = await cmdImpl.updateImpl(ctx.bot)
+        if failed:
+            # Failure
+            await dmChannel.send('During the update command there was a failure')
+    else:
+        dmChannel.send('!update is an admin only command.')
+
+    pass
+commandList.append(update)
 
 @commands.command(name='vertleaderboard', aliases=('vertlb','vlb'))
 async def _vertleaderboard(ctx, *args):
