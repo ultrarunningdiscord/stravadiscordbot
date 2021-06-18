@@ -15,7 +15,7 @@ import help
 import userData
 
 
-# Commands for the bot...just make sure to append to the commandList to rgister the command
+# Commands for the bot...just make sure to append to the commandList to register the command
 commandList = []
 
 
@@ -170,6 +170,15 @@ async def _register(ctx, *args):
     dmChannel = user.dm_channel
     if dmChannel is None:
         dmChannel = await user.create_dm()
+        # Test to see if the channel was created
+        try:
+            await dmChannel.send('Starting the registration process..')
+        except Exception as e:
+            print(e)
+            # Tell the user to turn on direct messages
+            mesg = user.mention + ' please turn on direct messages to start the registration process.'
+            await currChannel.send(mesg)
+
 
     if (len(args) == 0):
         # Open DM channel and display leaderboard w/ help on !register <rank>
