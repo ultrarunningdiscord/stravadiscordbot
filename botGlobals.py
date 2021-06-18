@@ -25,7 +25,6 @@ MONGO_DB_NAME = None
 MONGO_USER = None
 MONGO_PASSWD = None
 running = True
-redis_conn = None
 registrationData = 'registrations'
 resolveTime = 23
 resolveDay = 6 # Sunday for datetime object
@@ -50,11 +49,7 @@ userDataFile = 'stravaBot_userData'
 def init(stravaBot):
     global bot
     bot = stravaBot
-    global redis_conn
-    try:
-        redis_conn = redis.Redis(host='localhost', port=6379, db=0)
-    except (redis.exceptions.ConnectionError, ConnectionRefusedError) as e:
-        print('Redis connection error: ', e)
+
 
 
     # Grab the Strava Club ID from STRAVACLUB environment variable
@@ -158,7 +153,7 @@ def init(stravaBot):
 
 
 def refresh_token():
-    global stravaToken, stravaTokenExpire, redis_conn
+    global stravaToken, stravaTokenExpire
     print("Refreshing token")
     payload = {
         'client_id' : STRAVACLIENTID,
@@ -177,38 +172,19 @@ def refresh_token():
         # Use fixed time for expiration 1 hour in seconds
         stravaTokenExpire = datetime.utcnow() + timedelta(seconds=int(60 * 60))
 
-        if redis_conn is not None:
-            try:
-                redis_conn.set('token', stravaToken)
-            except redis.RedisError as e:
-                print('Redis exception: ', e)
-            try:
-                redis_conn.set('expiry', pickle.dumps(stravaTokenExpire))
-            except redis.RedisError as e:
-                print('Redis exception: ', e)
+
 
     return stravaToken, stravaTokenExpire
 
 def getToken():
-    global redis_conn, stravaToken, stravaTokenExpire
-    if redis_conn is not None:
-        try:
-            stravaToken = redis_conn.get('token').decode()
-            stravaTokenExpire = redis_conn.get('expiry')
-            if stravaTokenExpire is None:
-                stravaToken, stravaTokenExpire = refresh_token()
-            else:
-                # Convert to datetime object
-                stravaTokenExpire = pickle.loads(stravaTokenExpire)
-        except:
-            # If we except here, its due to a none byte error against decode
-            # TODO there might be a better way to handle this
+    global stravaToken, stravaTokenExpire
+    if stravaToken is not None:
+        if datetime.utcnow() > stravaTokenExpire:
             stravaToken, stravaTokenExpire = refresh_token()
-
-    if datetime.utcnow() > stravaTokenExpire:
-        stravaToken, stravaTokenExpire = refresh_token()
+        else:
+            print("Current token is active")
     else:
-        print("Current token is active")
+        stravaToken, stravaTokenExpire = refresh_token()
 
     return stravaToken
 

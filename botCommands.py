@@ -63,20 +63,10 @@ commandList.append(_leaderboard)
 async def _monthleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    try:
-        access_token = botGlobals.redis_conn.get('token').decode()
-        token_expiry = botGlobals.redis_conn.get('expiry').decode()
-    except:
-        # If we except here, its due to a none byte error against decode
-        # TODO there might be a better way to handle this
-        access_token, token_expiry  = botGlobals.refresh_token()
+    access_token = botGlobals.getToken()
 
-    token_expire_time = datetime.utcnow() + timedelta(seconds=int(token_expiry))
 
-    if datetime.utcnow() > token_expire_time:
-        access_token, token_expiry  = botGlobals.refresh_token()
-    else:
-        print("Current token is active")
+
 
     stravaAuthHeader = {'Content-Type': 'application/json',
                         'Authorization': 'Bearer {}'.format(access_token)}

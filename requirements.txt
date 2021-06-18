@@ -11,10 +11,11 @@ idna==2.10
 motor==2.4.0
 multidict==5.1.0
 pymongo==3.11.4
-redis==3.5.3
 requests==2.25.1
 schedule==1.1.0
 tornado==6.1
 typing-extensions==3.10.0.0
 urllib3==1.26.4
 yarl==1.6.3
+
+redis~=3.5.3
