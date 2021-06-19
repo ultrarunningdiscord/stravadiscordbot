@@ -59,90 +59,100 @@ async def _leaderboard(ctx, *args):
 
 commandList.append(_leaderboard)
 
-@commands.command()#name='monthleaderboard', aliases=('monthlb', 'month'))
+@commands.command(name='monthleaderboard', aliases=('monthlb', 'month'))
 async def _monthleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    access_token = botGlobals.getToken()
+
+
+    # Load the current leaderboard and add up everything then sort
+    leaderboardJSON = await botGlobals.loadLeaderboard()
+    if leaderboardJSON is not None:
+        # Monthly data is format
+        # {"6.2021" : {'stravaId': meters,
+        #             'stravaId2': meters}}
+        dataValues = {}
+        for i, rankedUser in enumerate(leaderboardJSON['data']):
+            athleteId = rankedUser['athlete_id']
+            meters = rankedUser['distance']
+            discordId = await userData.retrieveDiscordID(athleteId)
+            aUser = None
+            if discordId is not None:
+                aUser = await ctx.bot.fetch_user(discordId)
+            if aUser is not None:
+                dataValues[str(athleteId)] = rankedUser['distance']
+
+
+        monthYear = datetime.now().strftime(botGlobals.monthFormat)
+        currentMileage = await userData.getMontlyMileage(monthyear=monthYear)
+
+        # Add the mileage together
+        metersPerAthlete = currentMileage[monthYear]
+        for strava,m in metersPerAthlete.items():
+            if strava in dataValues:
+                dataValues[strava] = dataValues[strava] + m
+            else:
+                # This athelete wasn't found in the current leaderboard add their data
+                dataValues[strava] = m
 
 
 
+        # Display the new information
+        dataValues = dict(sorted(dataValues.items(), key=lambda x: x[1], reverse=True))
+        print('# ALS - output leaderboard')
+        linesPerEmbed = 20
+        embedMesg = []
+        embed = discord.Embed()
+        embed = discord.Embed(color=0x0000ff)
+        embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {monthYear} Monthly Distance Leaderboard:**\n"
 
-    stravaAuthHeader = {'Content-Type': 'application/json',
-                        'Authorization': 'Bearer {}'.format(access_token)}
+        embedMesg.append(embed)
+        embed = discord.Embed()
+        embed = discord.Embed(color=0x0000ff)
+        i = 0
+        leaderboardMsg = ""
+        for strava,m in dataValues.items():
+            boldstr = ""
+            if i < 10:
+                boldstr = "**"
+            discordId = await userData.retrieveDiscordID(int(strava))
+            aUser = None
+            if discordId is not None:
+                aUser = await ctx.bot.fetch_user(discordId)
 
 
+            if aUser is not None:
+                leaderboardMsg += boldstr + str(i+1) + '. '
+                leaderboardMsg += str(aUser.display_name)
 
-    # get first day of current month
-    today = datetime.utcnow()
-    firstDayCurrentMonth = datetime(today.year, today.month, 1)
 
-    embed = discord.Embed()
-    embed = discord.Embed(color=0x00ff00)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {today.strftime('%B')} Leaderboard:**\n"
+                leaderboardMsg +=   ' - ' + \
+                                    "{:,}".format(round(m/1000, 2)) + \
+                                    ' km (' + \
+                                    metersToMiles(m) + \
+                                    ')' + boldstr + '\n'
+                # Printing everything so use lines per embed
+                if linesPerEmbed <= 0:
+                    # Store current
+                    embed.description = leaderboardMsg
+                    embedMesg.append(embed)
 
-    firstDayCurrentMonth = time.mktime(firstDayCurrentMonth.timetuple())
-    page_no = 1
-    per_page = 5
-    leaderboard = []
-    total_activities = 0
-    leaderboardMsg = ''
+                    # Start a new embed message
+                    embed = discord.Embed()
+                    embed = discord.Embed(color=0x0000ff)
+                    linesPerEmbed = 20
+                    leaderboardMsg = ''
+                else:
+                    linesPerEmbed -= 1
+                i += 1
 
-    while 1:
-        try:
-            leaderboardMsg += f"------Page {page_no}------\n"
-            requestParams = {'page': page_no, 'per_page': per_page}#, 'after': firstDayCurrentMonth}
-            result = requests.get('https://www.strava.com/api/v3/clubs/' + botGlobals.STRAVACLUB + '/activities',
-                                  headers=stravaAuthHeader,
-                                  params=requestParams)
-            clubActivities = result.json()
 
-            for activity in clubActivities:
-                # filter by type: 'Run'
-                if activity['type'] != 'Run':
-                    continue
+        if leaderboardMsg:
+            embed.description = leaderboardMsg
+            embedMesg.append(embed)
 
-                total_activities += 1
-                # check if athlete exists in leaderboard
-                name = activity['athlete']['firstname'] + ' ' + activity['athlete']['lastname']
-                found = False
-                for athlete in leaderboard:
-                    if athlete['name'] == name:
-                        found = True
-                        athlete['distance'] += activity['distance']
-                        athlete['total_elevation_gain'] += activity['total_elevation_gain']
-                        athlete['num_activities'] += 1
-                        break
-
-                # otherwise add athlete to leaderboard
-                if not found:
-                    leaderboard.append({
-                        'name': name,
-                        'distance': activity['distance'],
-                        'total_elevation_gain': activity['total_elevation_gain'],
-                        'num_activities': 1
-                    })
-            if len(clubActivities) < per_page or page_no > 20:
-                break
-            page_no += 1
-        except:
-            break
-    leaderboardMsg += f'{total_activities} total activities.\n'
-    leaderboardMsg += f'{len(leaderboard)} total athletes.\n\n'
-    if len(leaderboard) > 0:
-        leaderboard.sort(key=lambda x: x['distance'], reverse=True)
-    for i, athlete in enumerate(leaderboard):
-        boldstr = ""
-        if i < 10:
-            boldstr = "**"
-        leaderboardMsg +=   boldstr + str(i+1) + '. ' + \
-                            athlete['name'] + ' - ' + \
-                            "{:,}".format(round(athlete['distance']/1000, 2)) + \
-                            ' km (' + \
-                            metersToMiles(athlete['distance']) + \
-                            ')' + boldstr + ' over ' + str(athlete['num_activities']) + ' runs\n'
-    embed.description = leaderboardMsg
-    await currChannel.send(embed=embed)
+        for e in embedMesg:
+            await currChannel.send(embed=e)
 
 commandList.append(_monthleaderboard)
 

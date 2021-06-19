@@ -100,3 +100,30 @@ async def checkLeaderBoardCache(discordId):
                 cacheData = result['leaderboardData']
 
     return cacheData
+async def getMontlyMileage(monthyear):
+    # Return the monthly mileage
+    monthlyMileage = None
+    collection = await getDataCollection(botGlobals.monthlyMileageData)
+
+    if collection is not None:
+        monthlyMileage = await collection.find_one({monthyear: {"$exists": True}})
+
+
+    return monthlyMileage
+
+async def setMontlyMileage(monthyear, data):
+
+
+    # If you find this strava athlete add to the miles with this weeks miles
+    collection = await getDataCollection(botGlobals.monthlyMileageData)
+
+    if collection is not None:
+        result = await collection.find_one({monthyear: {"$exists": True}})
+        if result is not None:
+            # Delete this entry
+            result = await collection.delete_many({monthyear: {"$exists": True}})
+    # Set the data for this monthYear
+    dataset = await setData(collectionName=botGlobals.monthlyMileageData,
+                            data={monthyear:data})
+
+    pass

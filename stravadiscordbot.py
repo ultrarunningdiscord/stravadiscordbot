@@ -9,6 +9,7 @@ from discord.ext.commands import Bot
 import botActivity
 import botGlobals
 import botCommands
+import botMonthly
 import dataUpdater
 import help
 
@@ -34,6 +35,7 @@ async def on_ready():
     print('We have logged in as {0.user}'.format(stravaBot))
     dataUpdater.updateDB.start()
     botActivity.runningEvent.start()
+    botMonthly.updateMonthlyData.start()
 
 
 m_loop = asyncio.get_event_loop()
@@ -48,6 +50,7 @@ def main():
         #m_loop.run_until_complete(globals.session.close())
         dataUpdater.updateDB.cancel()
         botActivity.runningEvent.cancel()
+        botMonthly.updateMonthlyData.cancel()
         pass
 
 if __name__ == '__main__':

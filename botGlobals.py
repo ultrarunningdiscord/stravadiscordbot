@@ -8,7 +8,8 @@ import requests
 import sys
 import time
 
-
+from conversions import metersToMiles
+import userData
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
 admin = [302457136959586304, 267777327885320193, 498195545228312578]
@@ -16,6 +17,7 @@ bot = None
 botToken = None
 cacheTimeout = 3600
 cacheData = 'userCache'
+currentMonth = None
 debug = False
 debugInit = ''
 leaderThread = None
@@ -24,6 +26,8 @@ mongoDb = None
 MONGO_DB_NAME = None
 MONGO_USER = None
 MONGO_PASSWD = None
+monthlyMileageData = 'monthlyMileage'
+monthFormat = '%m_%Y'
 running = True
 registrationData = 'registrations'
 resolveTime = 23
@@ -41,16 +45,12 @@ stravaPublicHeader = None
 updateDBTime = 23
 userDataFile = 'stravaBot_userData'
 
-
-
-
-
-
 def init(stravaBot):
     global bot
     bot = stravaBot
 
-
+    global currentMonth
+    currentMonth = datetime.now().month # Initialize
 
     # Grab the Strava Club ID from STRAVACLUB environment variable
     global STRAVACLUB
@@ -199,6 +199,16 @@ def getNewToken():
 async def loadLeaderboard():
     publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
                                      STRAVACLUB + '/leaderboard',
+                                     headers=stravaPublicHeader)
+    leaderboardJSON = None
+    if publicLeaderboard.status_code == 200:
+        leaderboardJSON = json.loads(publicLeaderboard.content)
+
+    return leaderboardJSON
+
+async def loadLastLeaderboard():
+    publicLeaderboard = requests.get('https://www.strava.com/clubs/' +
+                                     STRAVACLUB + '/leaderboard?week_offset=1',
                                      headers=stravaPublicHeader)
     leaderboardJSON = None
     if publicLeaderboard.status_code == 200:
