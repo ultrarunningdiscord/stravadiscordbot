@@ -100,7 +100,7 @@ async def updateImpl(bot):
     if leaderboardJSON is not None:
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             athleteId = rankedUser['athlete_id']
-
+            print('# ALS - user '+str(rankedUser['athlete_lastname']) + ' distance ' + str(metersToMiles(rankedUser['distance'])))
             discordId = await userData.retrieveDiscordID(athleteId)
             if discordId is not None:
                 user = await bot.fetch_user(discordId)
