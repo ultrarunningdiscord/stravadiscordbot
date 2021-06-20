@@ -18,6 +18,7 @@ botToken = None
 cacheTimeout = 3600
 cacheData = 'userCache'
 currentMonth = None
+currentMonthYear = None
 debug = False
 debugInit = ''
 leaderThread = None
@@ -49,8 +50,9 @@ def init(stravaBot):
     global bot
     bot = stravaBot
 
-    global currentMonth
+    global currentMonth, currentMonthYear, monthFormat
     currentMonth = datetime.now().month # Initialize
+    currentMonthYear = datetime.now().strftime(monthFormat)
 
     # Grab the Strava Club ID from STRAVACLUB environment variable
     global STRAVACLUB

@@ -69,7 +69,7 @@ async def _monthleaderboard(ctx, *args):
     leaderboardJSON = await botGlobals.loadLeaderboard()
     if leaderboardJSON is not None:
         # Monthly data is format
-        # {"6.2021" : {'stravaId': meters,
+        # {"6_2021" : {'stravaId': meters,
         #             'stravaId2': meters}}
         dataValues = {}
         for i, rankedUser in enumerate(leaderboardJSON['data']):
@@ -83,11 +83,11 @@ async def _monthleaderboard(ctx, *args):
                 dataValues[str(athleteId)] = rankedUser['distance']
 
 
-        monthYear = datetime.now().strftime(botGlobals.monthFormat)
-        currentMileage = await userData.getMontlyMileage(monthyear=monthYear)
+
+        currentMileage = await userData.getMontlyMileage(monthyear=botGlobals.currentMonthYear)
 
         # Add the mileage together
-        metersPerAthlete = currentMileage[monthYear]
+        metersPerAthlete = currentMileage[botGlobals.currentMonthYear]
         for strava,m in metersPerAthlete.items():
             if strava in dataValues:
                 dataValues[strava] = dataValues[strava] + m
@@ -99,12 +99,11 @@ async def _monthleaderboard(ctx, *args):
 
         # Display the new information
         dataValues = dict(sorted(dataValues.items(), key=lambda x: x[1], reverse=True))
-        print('# ALS - output leaderboard')
         linesPerEmbed = 20
         embedMesg = []
         embed = discord.Embed()
         embed = discord.Embed(color=0x0000ff)
-        embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {monthYear} Monthly Distance Leaderboard:**\n"
+        embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {botGlobals.currentMonthYear} Monthly Distance Leaderboard:**\n"
 
         embedMesg.append(embed)
         embed = discord.Embed()
@@ -112,6 +111,10 @@ async def _monthleaderboard(ctx, *args):
         i = 0
         leaderboardMsg = ""
         for strava,m in dataValues.items():
+            # Don't display until the athlete overcame the left-over mileage at the beginning of month
+            if m <= 0:
+                continue
+
             boldstr = ""
             if i < 10:
                 boldstr = "**"
