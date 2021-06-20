@@ -61,7 +61,13 @@ async def updateMonthlyData():
                 # Add the mileage together
                 metersPerAthlete = currentMileage[monthYear]
                 for strava,m in metersPerAthlete.items():
-                    dataValues[strava] = dataValues[strava] + m
+                    if strava in dataValues:
+                        # Update their total mileage
+                        dataValues[strava] = dataValues[strava] + m
+                    else:
+                        # New person add to the month
+                        dataValues[strava] = m
+
 
                 await userData.setMontlyMileage(monthyear=monthYear, data=dataValues)
 
