@@ -150,7 +150,12 @@ async def _monthleaderboard(ctx, *args):
         if leaderboardMsg:
             embed.description = leaderboardMsg
             embedMesg.append(embed)
-
+        # Add info text at hte bottom
+        embed = discord.Embed()
+        embed = discord.Embed(color=0x0000ff)
+        infoMesg = 'Shows and tracks registered users only. Type !register for details on how to register.'
+        embed.description = infoMesg
+        embedMesg.append(embed)
         for e in embedMesg:
             await currChannel.send(embed=e)
 
