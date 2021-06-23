@@ -133,6 +133,22 @@ async def checkLeaderBoardCache(discordId):
                 cacheData = result['leaderboardData']
 
     return cacheData
+
+async def clearLeaderBoardCache():
+    # Clear out any expired caches
+    collection = await getDataCollection(collectionName=botGlobals.cacheData)
+    if collection is not None:
+
+        cursor = collection.find()
+        updateData = []
+        for r in await cursor.to_list(length=1000):
+            expiration = pickle.loads(r['expires'])
+            if datetime.utcnow() > expiration:
+                updateData.append(r)
+
+        for d in updateData:
+            result = await collection.delete_many({'id':d['id']})
+
 async def getMontlyMileage(monthyear):
     # Return the monthly mileage
     monthlyMileage = None
