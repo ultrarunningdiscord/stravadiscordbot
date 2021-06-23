@@ -35,7 +35,7 @@ async def leaderboardImpl(channel, bot, entries=None):
 
             leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
 
-            if aUser:
+            if aUser is not None:
                 leaderboardMsg += aUser
             else:
                 leaderboardMsg += rankedUser['athlete_firstname'] + ' ' + \
