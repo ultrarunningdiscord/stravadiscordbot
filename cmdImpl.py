@@ -67,6 +67,14 @@ async def leaderboardImpl(channel, bot, entries=None):
         if leaderboardMsg:
             embed.description = leaderboardMsg
             embedMesg.append(embed)
+
+        # Add info text at hte bottom
+        embed = discord.Embed()
+        embed = discord.Embed(color=0x0000ff)
+        infoMesg = 'Missing your discord name. Type !register for details on how to register.'
+        embed.description = infoMesg
+        embedMesg.append(embed)
+
         if channel is not None:
             for e in embedMesg:
                 await channel.send(embed=e)
@@ -94,6 +102,8 @@ async def registerCacheImpl(channel, bot, discordId):
 
 async def updateImpl(bot):
     failed = False
+    # Clear our registration cache
+    botGlobals.registrationCache = None
     # Update the registration database with additional DISCORD info
     registrationData = await userData.getDataCollection(botGlobals.registrationData)
     if registrationData is not None:

@@ -48,13 +48,24 @@ async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=
 async def retrieveDiscordID(stravaId):
     discordId = None
     # Search the database for this stravaId
+    if botGlobals.registrationCache is None:
+        # Cache the database collection the cache is cleared when someone starts registration
+        collection = await getDataCollection(collectionName=botGlobals.registrationData)
 
-    collection = await getDataCollection(collectionName=botGlobals.registrationData)
-    if collection is not None:
-        result = await collection.find_one({'stravaId': stravaId})
-        if result is not None:
+        if collection is not None:
+            # Load the cache for faster lookup
+            cursor = collection.find()
+            botGlobals.registrationCache = {}
+            for r in await cursor.to_list(length=1000):
+                botGlobals.registrationCache[r['stravaId']] = {'id':r['id'], 'display_name':r['display_name'],
+                                                               'avatar_url':r['avatar_url']}
+                if 'nick' in r:
+                    botGlobals.registrationCache[r['stravaId']] = {'id':r['id'], 'display_name':r['display_name'],
+                                                                   'avatar_url':r['avatar_url'], 'nick':r['nick']}
 
-            discordId = int(result['id']) # Convert back into integer
+    if 'stravaId' in botGlobals.registrationCache:
+        user = botGlobals.registrationCache['stravaId']
+        discordId = int(user['id']) # Convert back into integer
 
 
 

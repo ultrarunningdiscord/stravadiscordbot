@@ -30,6 +30,7 @@ MONGO_PASSWD = None
 monthlyMileageData = 'monthlyMileage'
 monthFormat = '%m_%Y'
 running = True
+registrationCache = None
 registrationData = 'registrations'
 resolveTime = 23
 resolveDay = 6 # Sunday for datetime object
