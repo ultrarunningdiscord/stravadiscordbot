@@ -45,9 +45,7 @@ async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=
                             data=d)
     return dataset
 
-async def retrieveDiscordID(stravaId):
-    discordId = None
-    # Search the database for this stravaId
+async def buildRegistrationCache():
     if botGlobals.registrationCache is None:
         # Cache the database collection the cache is cleared when someone starts registration
         collection = await getDataCollection(collectionName=botGlobals.registrationData)
@@ -58,10 +56,15 @@ async def retrieveDiscordID(stravaId):
             botGlobals.registrationCache = {}
             for r in await cursor.to_list(length=1000):
                 botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                               'avatar_url':r['avatar_url']}
+                                                                    'avatar_url':r['avatar_url']}
                 if 'nick' in r:
                     botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                                   'avatar_url':r['avatar_url'], 'nick':r['nick']}
+                                                                        'avatar_url':r['avatar_url'], 'nick':r['nick']}
+
+async def retrieveDiscordID(stravaId):
+    discordId = None
+    # Search the database for this stravaId
+    await buildRegistrationCache()
 
     if str(stravaId) in botGlobals.registrationCache:
         user = botGlobals.registrationCache[str(stravaId)]
@@ -70,6 +73,20 @@ async def retrieveDiscordID(stravaId):
 
 
     return discordId
+
+async def retrieveNickname(stravaId):
+    # Retrieve nickname from database and if it doesn't exist get display_name
+    nickName = None
+    await buildRegistrationCache()
+
+    if str(stravaId) in botGlobals.registrationCache:
+        user = botGlobals.registrationCache[str(stravaId)]
+        nickName = user['display_name']
+        if 'nick' in user:
+            nickName = user['display_name']
+
+    return nickName
+
 
 async def deleteDiscordID(discordId):
     # Delete the database registration entry
