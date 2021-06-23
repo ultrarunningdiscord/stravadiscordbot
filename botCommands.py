@@ -118,15 +118,14 @@ async def _monthleaderboard(ctx, *args):
             boldstr = ""
             if i < 10:
                 boldstr = "**"
-            discordId = await userData.retrieveDiscordID(int(strava))
-            aUser = None
-            if discordId is not None:
-                aUser = await ctx.bot.fetch_user(discordId)
+
+            aUser = await userData.retrieveNickname(int(strava))
+
 
 
             if aUser is not None:
                 leaderboardMsg += boldstr + str(i+1) + '. '
-                leaderboardMsg += str(aUser.display_name)
+                leaderboardMsg += aUser
 
 
                 leaderboardMsg +=   ' - ' + \
