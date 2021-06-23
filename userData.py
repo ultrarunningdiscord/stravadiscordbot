@@ -33,11 +33,16 @@ async def setData(collectionName, data):
 
     return True
 
-async def setRegistration(discordId, stravaId, displayName, avatarURL):
+async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=None):
+    d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
+         'avatar_url':str(avatarURL)}
+
+    if nickname is not None:
+        d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
+             'avatar_url':str(avatarURL), 'nick':nickname}
 
     dataset = await setData(collectionName=botGlobals.registrationData,
-                            data={'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
-                                  'avatar_url':str(avatarURL)})
+                            data=d)
     return dataset
 
 async def retrieveDiscordID(stravaId):

@@ -114,7 +114,7 @@ async def updateImpl(bot):
 
                     dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
                                                              displayName=user.display_name,
-                                                             avatarURL=user.avatar_url)
+                                                             avatarURL=user.avatar_url, nickname=nickName)
                 else:
                     failed = True
 
