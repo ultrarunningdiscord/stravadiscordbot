@@ -100,7 +100,6 @@ async def updateImpl(bot):
     if leaderboardJSON is not None:
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             athleteId = rankedUser['athlete_id']
-            print('# ALS - user '+str(rankedUser['athlete_lastname']) + ' distance ' + str(metersToMiles(rankedUser['distance'])))
             discordId = await userData.retrieveDiscordID(athleteId)
             if discordId is not None:
                 user = await bot.fetch_user(discordId)
@@ -108,10 +107,10 @@ async def updateImpl(bot):
                 result = await userData.deleteDiscordID(discordId=user.id)
                 if result is not None:
                     nickName = None
-                    # for m in bot.get_all_members():
-                    #     if m.id == user.id:
-                    #         nickName = m.nick
-                    #         break
+                    for m in bot.get_all_members():
+                        if m.id == user.id:
+                            nickName = m.nick
+                            break
 
                     dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
                                                              displayName=user.display_name,
