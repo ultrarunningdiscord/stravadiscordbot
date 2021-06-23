@@ -75,10 +75,7 @@ async def _monthleaderboard(ctx, *args):
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             athleteId = rankedUser['athlete_id']
             meters = rankedUser['distance']
-            discordId = await userData.retrieveDiscordID(athleteId)
-            aUser = None
-            if discordId is not None:
-                aUser = await ctx.bot.fetch_user(discordId)
+            aUser = aUser = await userData.retrieveNickname(athleteId)
             if aUser is not None:
                 dataValues[str(athleteId)] = rankedUser['distance']
 
