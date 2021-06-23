@@ -30,16 +30,13 @@ async def leaderboardImpl(channel, bot, entries=None):
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
 
-            discordId = await userData.retrieveDiscordID(athleteId)
-            aUser = None
-            if discordId is not None and bot is not None:
-                aUser = await bot.fetch_user(discordId)
+            aUser = await userData.retrieveNickname(athleteId)
 
 
             leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
 
             if aUser:
-                leaderboardMsg += str(aUser.display_name)
+                leaderboardMsg += aUser
             else:
                 leaderboardMsg += rankedUser['athlete_firstname'] + ' ' + \
                                   rankedUser['athlete_lastname']
