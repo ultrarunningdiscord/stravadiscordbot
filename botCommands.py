@@ -187,7 +187,6 @@ async def _register(ctx, *args):
             mesg = user.mention + ' please turn on direct messages to start the registration process.'
             await currChannel.send(mesg)
 
-
     if (len(args) == 0):
         # Open DM channel and display leaderboard w/ help on !register <rank>
         await cmdImpl.registerCacheImpl(channel=dmChannel, bot=ctx.bot, discordId=ctx.message.author.id)
@@ -276,6 +275,9 @@ async def _register(ctx, *args):
                         await dmChannel.send('Failed to load the leaderboard.')
 
                 pass
+
+    # Clear our local registration cache
+    botGlobals.registrationCache = None
 
 commandList.append(_register)
 
