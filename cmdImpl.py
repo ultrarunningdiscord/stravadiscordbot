@@ -95,28 +95,31 @@ async def registerCacheImpl(channel, bot, discordId):
 async def updateImpl(bot):
     failed = False
     # Update the registration database with additional DISCORD info
-    leaderboardJSON = await botGlobals.loadLeaderboard()
+    registrationData = await userData.getDataCollection(botGlobals.registrationData)
+    if registrationData is not None:
+        cursor = registrationData.find()
+        updateData = []
+        for r in await cursor.to_list(length=1000):
+            nickName = None
+            for m in bot.get_all_members():
+                if m.id == r['id']:
+                    nickName = m.nick
+                    break
+            d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
+                 'avatar_url':r['avatar_url']}
 
-    if leaderboardJSON is not None:
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
-            athleteId = rankedUser['athlete_id']
-            discordId = await userData.retrieveDiscordID(athleteId)
-            if discordId is not None:
-                user = await bot.fetch_user(discordId)
-                # Delete the data
-                result = await userData.deleteDiscordID(discordId=user.id)
-                if result is not None:
-                    nickName = None
-                    for m in bot.get_all_members():
-                        if m.id == user.id:
-                            nickName = m.nick
-                            break
+            if nickName is not None:
+                d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
+                     'avatar_url':r['avatar_url'], 'nick':nickName}
+            updateData.append(d)
+        # Delete everything
+        result = await registrationData.delete_many({'id': {"$exists": True}})
+        for d in updateData:
+            dataset = await userData.setData(collectionName=botGlobals.registrationData,
+                                             data=d)
 
-                    dataSet = await userData.setRegistration(discordId=user.id, stravaId=athleteId,
-                                                             displayName=user.display_name,
-                                                             avatarURL=user.avatar_url, nickname=nickName)
-                else:
-                    failed = True
+    else:
+        failed = True
 
     return failed
 
