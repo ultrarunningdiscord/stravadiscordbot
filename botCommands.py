@@ -224,10 +224,15 @@ async def _register(ctx, *args):
                     if stravaId is not None:
                         # Delete any potential current registration
                         result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
-
+                        nickName = None
+                        for m in botGlobals.bot.get_all_members():
+                            if m.id == ctx.message.author.id:
+                                nickName = m.nick
+                                break
                         dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId,
                                                                  displayName=ctx.message.author.display_name,
-                                                                 avatarURL=ctx.message.author.avatar_url)
+                                                                 avatarURL=ctx.message.author.avatar_url,
+                                                                 nickname=nickName)
 
                         if dataSet:
                             # Display leaderboard for last check
