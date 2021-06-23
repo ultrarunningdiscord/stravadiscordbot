@@ -83,7 +83,7 @@ async def retrieveNickname(stravaId):
         user = botGlobals.registrationCache[str(stravaId)]
         nickName = user['display_name']
         if 'nick' in user:
-            nickName = user['display_name']
+            nickName = user['nick']
 
     return nickName
 
