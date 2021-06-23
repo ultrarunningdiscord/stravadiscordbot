@@ -57,14 +57,14 @@ async def retrieveDiscordID(stravaId):
             cursor = collection.find()
             botGlobals.registrationCache = {}
             for r in await cursor.to_list(length=1000):
-                botGlobals.registrationCache[r['stravaId']] = {'id':r['id'], 'display_name':r['display_name'],
+                botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
                                                                'avatar_url':r['avatar_url']}
                 if 'nick' in r:
-                    botGlobals.registrationCache[r['stravaId']] = {'id':r['id'], 'display_name':r['display_name'],
+                    botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
                                                                    'avatar_url':r['avatar_url'], 'nick':r['nick']}
 
-    if 'stravaId' in botGlobals.registrationCache:
-        user = botGlobals.registrationCache['stravaId']
+    if str(stravaId) in botGlobals.registrationCache:
+        user = botGlobals.registrationCache[str(stravaId)]
         discordId = int(user['id']) # Convert back into integer
 
 
