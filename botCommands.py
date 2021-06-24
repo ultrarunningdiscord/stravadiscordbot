@@ -342,6 +342,14 @@ async def strava(ctx, *args):
 
 commandList.append(strava)
 
+@commands.command(name='time', aliases=('timelb','tlb'))
+async def _time(ctx, *args):
+    user = ctx.message.author
+    currChannel = ctx.message.channel
+    await cmdImpl.timeleaderboardImpl(channel=currChannel, bot=ctx.bot)
+
+commandList.append(_time)
+
 @commands.command()
 async def update(ctx, *args):
     # Update the Mongo DB data for avatar_url and display_name
