@@ -70,7 +70,7 @@ async def leaderboardImpl(channel, bot, entries=None):
         # Add info text at hte bottom
         embed = discord.Embed()
         embed = discord.Embed(color=0x0000ff)
-        infoMesg = 'Missing your discord name. Type !register for details on how to register.'
+        infoMesg = 'Missing your discord name? Type !register for details on how to register.'
         embed.description = infoMesg
         embedMesg.append(embed)
 
