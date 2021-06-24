@@ -17,8 +17,8 @@ async def helpMsg():
     stravaMsg += 'Want to join the weekly leaderboard contest? Type `!register` for more details\n'
     stravaMsg += 'Show weekly vert leaderboard: `!vertleaderboard` or just `!vertlb` Use `!fullvert to see all athletes.`\n'
     stravaMsg += 'Show 7-day statistics: `!stats`\n'
-    stravaMsg += 'Show the monthly leaderboard: `!month, !monthlb or !monthleaderboard\n'
-    stravaMsg += 'Show the weekly time leaderboard: `!time, !timelb or !tlb\n'
+    stravaMsg += 'Show the monthly leaderboard: `!month, !monthlb or !monthleaderboard`\n'
+    stravaMsg += 'Show the weekly time leaderboard: `!time, !timelb or !tlb`\n'
     stravaMsg += 'Show this message: `!strava or !help`\n'
     embed.description = stravaMsg
 
