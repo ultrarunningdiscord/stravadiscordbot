@@ -1,3 +1,5 @@
+import datetime
+
 import discord
 
 from conversions import metersToMiles, metersToFeet
@@ -130,6 +132,63 @@ async def updateImpl(bot):
 
     return failed
 
+async def timeleaderboardImpl(channel, bot):
+
+    embedMesg = []
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x800080)
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} Weekly Time Leaderboard:**\n"
+
+    leaderboardJSON = await botGlobals.loadLeaderboard()
+
+    if leaderboardJSON is not None:
+        leaderboardMsg = ""
+        leaderboardJSON['data'].sort(key=lambda x: x['moving_time'], reverse=True)
+        i = 0
+        for j, rankedUser in enumerate(leaderboardJSON['data']):
+            if i >= 30:
+                break
+
+            boldstr = ""
+            if i < 10:
+                boldstr = "**"
+            athleteId = rankedUser['athlete_id']
+            aUser = await userData.retrieveNickname(athleteId)
+            if aUser is not None:
+
+
+                leaderboardMsg +=   boldstr + str(i+1) + '. '
+
+
+                leaderboardMsg += aUser
+
+                movingTime = datetime.timedelta(seconds=rankedUser['moving_time']) # in seconds
+
+                leaderboardMsg +=   ': ' + \
+                                    str(movingTime) + ' time '
+
+                leaderboardMsg +=   ' over ' + \
+                                    "{:,}".format(round(rankedUser['distance']/1000, None)) + \
+                                    'km (' + \
+                                    metersToMiles(meters=rankedUser['distance'], showUnit=False, roundTo=None) + \
+                                    'mi)' + boldstr + '\n'
+                i += 1
+
+
+
+        if leaderboardMsg:
+            embed.description = leaderboardMsg
+            embedMesg.append(embed)
+        if channel is not None:
+            embed = discord.Embed()
+            embed = discord.Embed(color=0x800080)
+            infoMesg = 'Shows and tracks registered users only. Type !register for details on how to register.'
+            embed.description = infoMesg
+            embedMesg.append(embed)
+            for e in embedMesg:
+                await channel.send(embed=e)
+
+    return leaderboardJSON
 
 async def vertleaderboardImpl(channel, bot, entries=None):
     linesPerEmbed = 20
