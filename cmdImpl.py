@@ -215,10 +215,9 @@ async def vertleaderboardImpl(channel, bot, entries=None):
             if i < 10:
                 boldstr = "**"
             athleteId = rankedUser['athlete_id']
-            discordId = await userData.retrieveDiscordID(athleteId)
-            aUser = None
-            if discordId and bot is not None:
-                aUser = await bot.fetch_user(discordId)
+
+            aUser = await userData.retrieveNickname(athleteId)
+
 
             leaderboardMsg +=   boldstr + str(i+1) + '. '
 
