@@ -222,7 +222,7 @@ async def vertleaderboardImpl(channel, bot, entries=None):
             leaderboardMsg +=   boldstr + str(i+1) + '. '
 
             if aUser:
-                leaderboardMsg += str(aUser.display_name)
+                leaderboardMsg += aUser
             else:
                 leaderboardMsg += rankedUser['athlete_firstname'] + ' ' + \
                                   rankedUser['athlete_lastname']
