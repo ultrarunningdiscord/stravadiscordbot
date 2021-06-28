@@ -11,6 +11,7 @@ import botGlobals
 import botCommands
 import botMonthly
 import dataUpdater
+import distanceLeader
 import help
 
 
@@ -34,6 +35,7 @@ for c in botCommands.commandList:
 async def on_ready():
     print('We have logged in as {0.user}'.format(stravaBot))
     dataUpdater.updateDB.start()
+    distanceLeader.crownDistanceLeaders.start()
     botActivity.runningEvent.start()
     botMonthly.updateMonthlyData.start()
 
@@ -49,6 +51,7 @@ def main():
     finally:
         #m_loop.run_until_complete(globals.session.close())
         dataUpdater.updateDB.cancel()
+        distanceLeader.crownDistanceLeaders.cancel()
         botActivity.runningEvent.cancel()
         botMonthly.updateMonthlyData.cancel()
         pass
