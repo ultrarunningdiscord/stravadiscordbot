@@ -19,6 +19,7 @@ async def crownDistanceLeaders():
                 aUser = await userData.retrieveNickname(athleteId)
                 if aUser is not None:
                     distanceWinnerMale = await userData.retrieveDiscordID(athleteId)
+                    break
 
 
             if distanceWinnerMale is not None:
