@@ -161,8 +161,6 @@ async def getMontlyMileage(monthyear):
     return monthlyMileage
 
 async def setMontlyMileage(monthyear, data):
-
-
     # If you find this strava athlete add to the miles with this weeks miles
     collection = await getDataCollection(botGlobals.monthlyMileageData)
 
@@ -175,4 +173,28 @@ async def setMontlyMileage(monthyear, data):
     dataset = await setData(collectionName=botGlobals.monthlyMileageData,
                             data={monthyear:data})
 
-    pass
+async def getDistanceLeader():
+    # Return the distance leaders
+    distanceLeaderMale = None
+    distanceLeaderFemale = None
+    collection = await getDataCollection(botGlobals.distanceLeader)
+
+    if collection is not None:
+        distanceLeaderMale = await collection.find_one({'male': {"$exists": True}})
+        distanceLeaderFemale = await collection.find_one({'female': {"$exists": True}})
+
+
+    return distanceLeaderMale, distanceLeaderFemale
+
+async def setDistanceLeader(gender, id):
+    collection = await getDataCollection(botGlobals.distanceLeader)
+
+    if collection is not None:
+        result = await collection.find_one({gender: {"$exists": True}})
+        if result is not None:
+            # Delete this entry
+            result = await collection.delete_many({gender: {"$exists": True}})
+    # Set the data
+    dataset = await setData(collectionName=botGlobals.distanceLeader,
+                            data={gender:id})
+
