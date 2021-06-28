@@ -7,7 +7,7 @@ import userData
 
 @tasks.loop(minutes=60)
 async def crownDistanceLeaders():
-    if True:#datetime.now().hour == botGlobals.resolveTime and datetime.now().weekday() == botGlobals.resolveDay:
+    if datetime.now().hour == botGlobals.resolveTime and datetime.now().weekday() == botGlobals.resolveDay:
         leaderboardJSON = await botGlobals.loadLastLeaderboard()
 
         if leaderboardJSON is not None:
