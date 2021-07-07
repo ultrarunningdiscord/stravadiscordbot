@@ -28,27 +28,31 @@ async def crownDistanceLeaders():
                 femaleRole = None
                 # Put into database
                 await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
-                # for g in botGlobals.bot.guilds:
-                #     for r in g.roles:
-                #         if r.name == botGlobals.distanceMaleRole:
-                #             maleRole = r
-                #         if r.name == botGlobals.distanceFemaleRole:
-                #             femaleRole = r
-                # if maleRole is not None:
-                #     # Remove the distance leader role
-                #
-                #     if currentMale is not None:
-                #         for m in botGlobals.bot.get_all_members():
-                #             if m.id == currentMale['male']:
-                #                 await m.remove_roles(maleRole)
-                #                 break
-                #     # Assign the role
-                #     for m in botGlobals.bot.get_all_members():
-                #         if m.id == distanceWinnerMale.id:
-                #             # Assign role and save this
-                #
-                #             await m.add_roles(maleRole)
-                #             break
+                try:
+                    for g in botGlobals.bot.guilds:
+                        for r in g.roles:
+                            if r.name == botGlobals.distanceMaleRole:
+                                maleRole = r
+                            if r.name == botGlobals.distanceFemaleRole:
+                                femaleRole = r
+                    if maleRole is not None:
+                        # Remove the distance leader role
+
+                        if currentMale is not None:
+                            for m in botGlobals.bot.get_all_members():
+                                if m.id == currentMale['male']:
+                                    await m.remove_roles(maleRole)
+                                    break
+                        # Assign the role
+                        for m in botGlobals.bot.get_all_members():
+                            if m.id == distanceWinnerMale.id:
+                                # Assign role and save this
+
+                                await m.add_roles(maleRole)
+                                break
+                except Exception as e:
+                    print(e)
+
                 # if femaleRole is not None:
                 #     if currentFemale is not None:
                 #         for m in botGlobals.bot.get_all_members():
