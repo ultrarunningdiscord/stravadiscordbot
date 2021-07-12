@@ -294,7 +294,11 @@ async def assignLeader(role, id, currentLeader, channel=None):
             if m.id == id:
                 # Assign role and save this
                 if channel is not None:
-                    nickname = await userData.retrieveNickname(m.id)
+                    await userData.buildRegistrationCache()
+                    for k,v in botGlobals.registrationCache.items():
+                        m = 'key '+str(k)+' v: '+str(v)
+                        await channel.send(m)
+                    nickname = await userData.retrieveNickname(id)
                     mesg = '# ALS - FOUND  '+str(m.id)
                     if nickname is not None:
                         mesg += ' nick '+str(nickname)
