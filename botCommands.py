@@ -50,6 +50,33 @@ async def _fullvert(ctx, *args):
     await cmdImpl.vertleaderboardImpl(channel=currChannel, bot=ctx.bot)
 commandList.append(_fullvert)
 
+@commands.command()
+async def leader(ctx, *args):
+    # Update the Mongo DB data for avatar_url and display_name
+    # ADMIN ONLY
+    user = ctx.message.author
+    dmChannel = user.dm_channel
+    if dmChannel is None:
+        dmChannel = await user.create_dm()
+
+
+    admin = await botGlobals.checkAdmin(ctx=ctx)
+    mesg = None
+    if admin:
+        try:
+            currentMale, currentFemale = await userData.getDistanceLeader()
+
+
+            await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=currentMale.id,
+                                       currentLeader=currentMale)
+        except Exception as mesg:
+            dmChannel.send(mesg)
+
+    else:
+        dmChannel.send('!update is an admin only command.')
+
+    pass
+commandList.append(leader)
 
 @commands.command(name='leaderboard', aliases=('lb','leader'))
 async def _leaderboard(ctx, *args):
