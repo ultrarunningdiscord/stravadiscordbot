@@ -270,39 +270,21 @@ async def assignLeader(role, id, currentLeader, channel=None):
     distanceRole = None
     for g in botGlobals.bot.guilds:
         for r in g.roles:
-            if channel is not None:
-                await channel.send('# ALS - guild role '+str(r.name))
             if r.name == role:
                 distanceRole = r
                 break
 
-    if channel is not None:
-        await channel.send('# ALS - role '+str(distanceRole))
-
     if distanceRole is not None:
         # Remove the distance leader role
-
         if currentLeader is not None:
             for m in botGlobals.bot.get_all_members():
                 if m.id == currentLeader['male']:
-                    if channel is not None:
-                        await channel.send('# ALS - REMOVED FOUND  '+str(m.id))
                     await m.remove_roles(distanceRole)
                     break
+
         # Assign the role
         for m in botGlobals.bot.get_all_members():
             if m.id == id:
                 # Assign role and save this
-                if channel is not None:
-                    await channel.send('Build cache and get nick...')
-
-
-                    nickname = await userData.retrieveNick(id)
-                    mesg = '# ALS - FOUND  '+str(m.id)
-                    if nickname is not None:
-                        mesg += ' nick '+str(nickname)
-                    else:
-                        mesg += ' FUCK ME'
-                    await channel.send(mesg)
                 await m.add_roles(distanceRole)
                 break
