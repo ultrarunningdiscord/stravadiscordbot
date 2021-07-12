@@ -87,6 +87,20 @@ async def retrieveNickname(stravaId):
 
     return nickName
 
+async def retrieveNick(discordId):
+    # Retrieve nickname from database and if it doesn't exist get display_name
+    nickName = None
+    await buildRegistrationCache()
+
+    for k,v in botGlobals.registrationCache.items():
+        if 'id' in v:
+            if v['id'] == discordId:
+                nickName = v['display_name']
+                if 'nick' in v:
+                    nickName = v['nick']
+                break
+
+    return nickName
 
 async def deleteDiscordID(discordId):
     # Delete the database registration entry
