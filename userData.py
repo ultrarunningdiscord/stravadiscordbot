@@ -33,13 +33,13 @@ async def setData(collectionName, data):
 
     return True
 
-async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=None):
+async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=None, gender='male'):
     d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
-         'avatar_url':str(avatarURL)}
+         'avatar_url':str(avatarURL), 'gender':gender}
 
     if nickname is not None:
         d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
-             'avatar_url':str(avatarURL), 'nick':nickname}
+             'avatar_url':str(avatarURL), 'nick':nickname, 'gender':gender}
 
     dataset = await setData(collectionName=botGlobals.registrationData,
                             data=d)
@@ -55,11 +55,16 @@ async def buildRegistrationCache():
             cursor = collection.find()
             botGlobals.registrationCache = {}
             for r in await cursor.to_list(length=1000):
+                gender = 'male'
+                if 'gender' in r:
+                    gender = r['gender']
+
                 botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                                    'avatar_url':r['avatar_url']}
+                                                                    'avatar_url':r['avatar_url'],'gender':gender}
                 if 'nick' in r:
                     botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                                        'avatar_url':r['avatar_url'], 'nick':r['nick']}
+                                                                        'avatar_url':r['avatar_url'], 'nick':r['nick'],
+                                                                        'gender':gender}
 
 async def retrieveDiscordID(stravaId):
     discordId = None

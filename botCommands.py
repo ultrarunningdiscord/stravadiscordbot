@@ -192,7 +192,7 @@ async def _register(ctx, *args):
     # Interact with the user to connect their strava athlete id w/ discord id
     # using the current leaderboard rank
     # !register - sends DM describing command flow and leaderboard in a DM w/ leaderboard first
-    # !register <number of leaderboard> - Assigns the current strava athlete at that position to
+    # !register <number of leaderboard> <gender> - Assigns the current strava athlete at that position to
     #                                     the discord user and prints out confirmation
     # !register erase - Removes the current discord id from any strava id connection
     # !register erase <number of lb> - Admin only command that removes that discord id from that strava athlete id
@@ -281,9 +281,10 @@ async def _register(ctx, *args):
                 await dmChannel.send('```Please try again as the leaderboard may have changed and type !register <rank>.```')
 
     elif (len(args) == 2):
+
         admin = await botGlobals.checkAdmin(ctx=ctx)
-        if admin:
-            if args[0] == 'erase':
+        if args[0] == 'erase':
+            if admin:
                 if args[1].isdigit():
                     deletePos = int(args[1])
                     stravaId = None
@@ -303,6 +304,61 @@ async def _register(ctx, *args):
                         await dmChannel.send('Failed to load the leaderboard.')
 
                 pass
+        elif args[0].isdigit():
+            rankPos = int(args[0])
+            gender = 'male'
+            if args[1] == 'female' or args[1] == 'f':
+                gender = 'female'
+            # Check the cache to see if its valid
+            checkCache = await userData.checkLeaderBoardCache(discordId=ctx.message.author.id)
+            if checkCache is not None:
+                # Set the strava ID
+                stravaId = None
+                wrongRank = True
+                # Use the cached leaderboard
+                leaderboardJSON = checkCache
+                if leaderboardJSON is not None:
+                    for rank, rankedUser in enumerate(leaderboardJSON['data']):
+                        if rank == (rankPos - 1):
+                            # This is our athlete
+                            stravaId = rankedUser['athlete_id']
+                            wrongRank = False
+                            break
+
+                    if stravaId is not None:
+                        # Delete any potential current registration
+                        result = await userData.deleteDiscordID(discordId=ctx.message.author.id)
+                        nickName = None
+                        for m in botGlobals.bot.get_all_members():
+                            if m.id == ctx.message.author.id:
+                                nickName = m.nick
+                                break
+                        dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId,
+                                                                 displayName=ctx.message.author.display_name,
+                                                                 avatarURL=ctx.message.author.avatar_url,
+                                                                 nickname=nickName, gender=gender)
+
+                        if dataSet:
+                            # Display leaderboard for last check
+                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                            # Remove cache and cache expiration
+                            mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
+                            mesg += '       !register erase then !register to restart registration process.'
+                            await dmChannel.send(mesg)
+                        else:
+                            await dmChannel.send('Failed to set registration for strava ID: '+str(stravaId))
+                    else:
+                        if wrongRank:
+                            await dmChannel.send('The rank you entered does not exist.')
+
+
+                else:
+                    # Failed to load leaderboard
+                    await dmChannel.send('Failed to load leaderboard try again later.')
+            else:
+                # Cache is invalid display leaderboard and re-cache
+                await cmdImpl.registerCacheImpl(channel=dmChannel, bot=ctx.bot, discordId=ctx.message.author.id)
+                await dmChannel.send('```Please try again as the leaderboard may have changed and type !register <rank>.```')
 
     # Clear our local registration cache
     botGlobals.registrationCache = None
