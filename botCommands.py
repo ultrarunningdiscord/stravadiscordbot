@@ -67,11 +67,11 @@ async def _distanceLeader(ctx, *args):
             await dmChannel.send('Starting assignment...')
             currentMale, currentFemale = await userData.getDistanceLeader()
 
-
+            await dmChannel.send('currentMale'+str(currentMale))
             await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=currentMale['male'],
                                        currentLeader=currentMale)
         except Exception as mesg:
-            dmChannel.send(mesg)
+            await dmChannel.send(mesg)
 
     else:
         dmChannel.send('!leader is an admin only command.')
