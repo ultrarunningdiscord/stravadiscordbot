@@ -294,7 +294,7 @@ async def assignLeader(role, id, currentLeader, channel=None):
             if m.id == id:
                 # Assign role and save this
                 if channel is not None:
-                    nickname = userData.retrieveNickname(m.id)
+                    nickname = await userData.retrieveNickname(m.id)
                     await channel.send('# ALS - FOUND  '+str(m.id) + ' nick '+nickname)
                 await m.add_roles(distanceRole)
                 break
