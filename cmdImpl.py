@@ -265,3 +265,30 @@ async def vertleaderboardImpl(channel, bot, entries=None):
             await channel.send('Failed to load vertical leaderboard. Please try again later.')
 
     return leaderboardJSON
+
+async def assignLeader(role, id, currentLeader):
+    try:
+        distanceRole = None
+        for g in botGlobals.bot.guilds:
+            for r in g.roles:
+                if r.name == role:
+                    distanceRole = r
+
+        if distanceRole is not None:
+            # Remove the distance leader role
+
+            if currentLeader is not None:
+                for m in botGlobals.bot.get_all_members():
+                    if m.id == currentLeader['male']:
+                        await m.remove_roles(distanceRole)
+                        break
+            # Assign the role
+            for m in botGlobals.bot.get_all_members():
+                if m.id == id:
+                    # Assign role and save this
+
+                    await m.add_roles(distanceRole)
+                    break
+    except Exception as e:
+        print(e)
+    pass

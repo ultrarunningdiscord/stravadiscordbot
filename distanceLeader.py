@@ -28,46 +28,11 @@ async def crownDistanceLeaders():
                 femaleRole = None
                 # Put into database
                 await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
-                try:
-                    for g in botGlobals.bot.guilds:
-                        for r in g.roles:
-                            if r.name == botGlobals.distanceMaleRole:
-                                maleRole = r
-                            if r.name == botGlobals.distanceFemaleRole:
-                                femaleRole = r
-                    if maleRole is not None:
-                        # Remove the distance leader role
+                await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
+                                           currentLeader=currentMale)
 
-                        if currentMale is not None:
-                            for m in botGlobals.bot.get_all_members():
-                                if m.id == currentMale['male']:
-                                    await m.remove_roles(maleRole)
-                                    break
-                        # Assign the role
-                        for m in botGlobals.bot.get_all_members():
-                            if m.id == distanceWinnerMale.id:
-                                # Assign role and save this
 
-                                await m.add_roles(maleRole)
-                                break
-                except Exception as e:
-                    print(e)
 
-                # if femaleRole is not None:
-                #     if currentFemale is not None:
-                #         for m in botGlobals.bot.get_all_members():
-                #             if m.id == currentFemale['female']:
-                #                 await m.remove_roles(femaleRole)
-                #                 break
-
-                    # Assign the role
-                    # TODO Female distance king
-                    # for m in botGlobals.bot.get_all_members():
-                    #     if m.id == distanceWinnerMale.id:
-                    #         # Assign role and save this
-                    #         #await userData.setDistanceLeader(gender='male', id=distanceWinnerMale.id)
-                    #         #await m.add_roles(maleRole)
-                    #         break
 
 
 
