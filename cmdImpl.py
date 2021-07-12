@@ -270,8 +270,12 @@ async def assignLeader(role, id, currentLeader, channel=None):
     distanceRole = None
     for g in botGlobals.bot.guilds:
         for r in g.roles:
+            if channel is not None:
+                await channel.send('# ALS - guild role '+str(r.name))
             if r.name == role:
                 distanceRole = r
+                break
+
     if channel is not None:
         await channel.send('# ALS - role '+str(distanceRole))
 
