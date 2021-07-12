@@ -64,7 +64,7 @@ async def _distanceLeader(ctx, *args):
     mesg = None
     if admin:
         try:
-            dmChannel.send('Starting assignment...')
+            await dmChannel.send('Starting assignment...')
             currentMale, currentFemale = await userData.getDistanceLeader()
 
 
