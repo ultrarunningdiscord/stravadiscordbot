@@ -102,7 +102,7 @@ async def _monthleaderboard(ctx, *args):
         for i, rankedUser in enumerate(leaderboardJSON['data']):
             athleteId = rankedUser['athlete_id']
             meters = rankedUser['distance']
-            aUser = aUser = await userData.retrieveNickname(athleteId)
+            aUser = await userData.retrieveNickname(athleteId)
             if aUser is not None:
                 dataValues[str(athleteId)] = rankedUser['distance']
 
