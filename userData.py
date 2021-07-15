@@ -92,6 +92,16 @@ async def retrieveNickname(stravaId):
 
     return nickName
 
+async def retrieveGender(stravaId):
+    gender = 'male'
+    await buildRegistrationCache()
+
+    if str(stravaId) in botGlobals.registrationCache:
+        user = botGlobals.registrationCache[str(stravaId)]
+        if 'gender' in user:
+            gender = user['gender']
+    return gender
+
 async def retrieveNick(discordId):
     # Retrieve nickname from database and if it doesn't exist get display_name
     nickName = None

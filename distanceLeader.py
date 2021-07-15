@@ -13,23 +13,38 @@ async def crownDistanceLeaders():
         if leaderboardJSON is not None:
 
             distanceWinnerMale = None
+            distanceWinnerFemale = None
             for i, rankedUser in enumerate(leaderboardJSON['data']):
                 athleteId = rankedUser['athlete_id']
                 meters = rankedUser['distance']
                 aUser = await userData.retrieveNickname(athleteId)
                 if aUser is not None:
-                    distanceWinnerMale = await userData.retrieveDiscordID(athleteId)
-                    break
+                    # Retrieve the gender
+                    gender = await userData.retrieveGender(athleteId)
+                    if gender == 'male':
+                        if distanceWinnerMale is None:
+                            distanceWinnerMale = await userData.retrieveDiscordID(athleteId)
+                    elif gender == 'female':
+                        if distanceWinnerFemale is None:
+                            distanceWinnerFemale = await userData.retrieveDiscordID(athleteId)
 
 
+            currentMale, currentFemale = await userData.getDistanceLeader()
             if distanceWinnerMale is not None:
-                currentMale, currentFemale = await userData.getDistanceLeader()
-                maleRole = None
-                femaleRole = None
+
+
+
                 # Put into database
                 await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
                 await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
                                            currentLeader=currentMale)
+            if distanceWinnerFemale is not None:
+
+
+                # Put into database
+                await userData.setDistanceLeader(gender='female', id=distanceWinnerFemale)
+                await cmdImpl.assignLeader(role=botGlobals.distanceFemaleRole, id=distanceWinnerFemale,
+                                           currentLeader=currentFemale)
 
 
 
