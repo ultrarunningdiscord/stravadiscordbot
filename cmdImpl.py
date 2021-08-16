@@ -280,7 +280,8 @@ async def assignLeader(role, id, currentLeader, channel=None):
             for m in botGlobals.bot.get_all_members():
                 if m.id == currentLeader['male']:
                     await m.remove_roles(distanceRole)
-                    break
+                if m.id == currentLeader['female']:
+                    await m.remove_roles(distanceRole)
 
         # Assign the role
         for m in botGlobals.bot.get_all_members():
