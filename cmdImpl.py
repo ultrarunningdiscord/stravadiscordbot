@@ -99,7 +99,7 @@ async def registerCacheImpl(channel, bot, discordId):
     if not reset:
         await channel.send('Failed to cache the leaderboard.')
 
-async def updateImpl(bot):
+async def updateImpl(bot, dmChannel=None):
     failed = False
     # Clear our registration cache
     botGlobals.registrationCache = None
@@ -128,6 +128,8 @@ async def updateImpl(bot):
         # Delete everything
         result = await registrationData.delete_many({'id': {"$exists": True}})
         for d in updateData:
+            if dmChannel is not None:
+                await dmChannel.send('Data: '+str(d))
             dataset = await userData.setData(collectionName=botGlobals.registrationData,
                                              data=d)
 
