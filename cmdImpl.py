@@ -109,10 +109,12 @@ async def updateImpl(bot, dmChannel=None):
     rData = await userData.getDataCollection(botGlobals.registrationData)
     if rData is not None:
         if dmChannel is not None:
-            await dmChannel.send('# DEBUG updateImpl rData '+str(rData))
+            await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(rData))
         cursor = rData.find()
         updateData = []
         for r in await cursor.to_list(length=1000):
+            if dmChannel is not None:
+                await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(r))
             nickName = None
             for m in bot.get_all_members():
                 if m.id == r['id']:
