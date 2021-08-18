@@ -103,12 +103,14 @@ async def updateImpl(bot, dmChannel=None):
     failed = False
     # Clear our registration cache
     if dmChannel is not None:
-        await dmChannel.send('# DEBUG updateImpl')
+        await dmChannel.send('# DEBUG updateImpl '+str(botGlobals.registrationData))
     botGlobals.registrationCache = None
     # Update the registration database with additional DISCORD info
-    registrationData = await userData.getDataCollection(botGlobals.registrationData)
-    if registrationData is not None:
-        cursor = registrationData.find()
+    rData = await userData.getDataCollection(botGlobals.registrationData)
+    if rData is not None:
+        if dmChannel is not None:
+            await dmChannel.send('# DEBUG updateImpl rData '+str(rData))
+        cursor = rData.find()
         updateData = []
         for r in await cursor.to_list(length=1000):
             nickName = None
@@ -134,7 +136,7 @@ async def updateImpl(bot, dmChannel=None):
             else:
                 await dmChannel.send('NO DATA')
         # Delete everything
-        result = await registrationData.delete_many({'id': {"$exists": True}})
+        result = await rData.delete_many({'id': {"$exists": True}})
         for d in updateData:
             if dmChannel is not None:
                 await dmChannel.send('Data: '+str(d))
