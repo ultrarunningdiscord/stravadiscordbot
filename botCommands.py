@@ -445,9 +445,7 @@ async def update(ctx, *args):
 
     admin = await botGlobals.checkAdmin(ctx=ctx)
     if admin:
-        currChannel = ctx.message.channel
-        await currChannel.send('# DEBUG (NEW) this is the new bot')
-        failed = await cmdImpl.updateImpl(ctx.bot, currChannel)
+        failed = await cmdImpl.updateImpl(ctx.bot)
         if failed:
             # Failure
             await dmChannel.send('During the update command there was a failure')
