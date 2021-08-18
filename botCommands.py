@@ -445,7 +445,7 @@ async def update(ctx, *args):
 
     admin = await botGlobals.checkAdmin(ctx=ctx)
     if admin:
-        failed = await cmdImpl.updateImpl(ctx.bot)
+        failed = await cmdImpl.updateImpl(ctx.bot, dmChannel)
         if failed:
             # Failure
             await dmChannel.send('During the update command there was a failure')
