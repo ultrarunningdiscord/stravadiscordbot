@@ -118,10 +118,10 @@ async def updateImpl(bot, dmChannel=None):
             if dmChannel is not None:
                 await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(r))
             nickName = None
-            for m in bot.get_all_members():
-                if m.id == r['id']:
-                    nickName = m.nick
-                    break
+            # for m in bot.get_all_members():
+            #     if m.id == r['id']:
+            #         nickName = m.nick
+            #         break
             if dmChannel is not None:
                 await dmChannel.send('# DEBUG (NEW) updateImpl finished NICK search ')
             gender = 'male'
