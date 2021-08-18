@@ -102,6 +102,8 @@ async def registerCacheImpl(channel, bot, discordId):
 async def updateImpl(bot, dmChannel=None):
     failed = False
     # Clear our registration cache
+    if dmChannel is not None:
+        await dmChannel.send('# DEBUG updateImpl')
     botGlobals.registrationCache = None
     # Update the registration database with additional DISCORD info
     registrationData = await userData.getDataCollection(botGlobals.registrationData)
