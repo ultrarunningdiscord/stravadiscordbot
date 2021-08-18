@@ -54,7 +54,8 @@ async def buildRegistrationCache():
             # Load the cache for faster lookup
             cursor = collection.find()
             botGlobals.registrationCache = {}
-            for r in await cursor.to_list(length=1000):
+            r = await cursor.to_list(length=1)
+            while r:
                 gender = 'male'
                 if 'gender' in r:
                     gender = r['gender']
@@ -65,6 +66,7 @@ async def buildRegistrationCache():
                     botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
                                                                         'avatar_url':r['avatar_url'], 'nick':r['nick'],
                                                                         'gender':gender}
+                r = await cursor.to_list(length=1)
 
 async def retrieveDiscordID(stravaId):
     discordId = None
@@ -170,10 +172,12 @@ async def clearLeaderBoardCache():
 
         cursor = collection.find()
         updateData = []
-        for r in await cursor.to_list(length=1000):
+        r = await cursor.to_list(length=1)
+        while r:
             expiration = pickle.loads(r['expires'])
             if datetime.utcnow() > expiration:
                 updateData.append(r)
+            r = await cursor.to_list(length=1)
 
         for d in updateData:
             result = await collection.delete_many({'id':d['id']})
