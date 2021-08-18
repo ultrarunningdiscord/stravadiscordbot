@@ -135,6 +135,8 @@ async def updateImpl(bot, dmChannel=None):
                 d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
                      'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
             updateData.append(d)
+            if dmChannel is not None:
+                await dmChannel.send('# DEBUG (NEW) FINISHED UPDTATE updateImpl  '+str(updateData))
         if dmChannel is not None:
             await dmChannel.send('DEBUG: ')
             if updateData:
