@@ -99,32 +99,24 @@ async def registerCacheImpl(channel, bot, discordId):
     if not reset:
         await channel.send('Failed to cache the leaderboard.')
 
-async def updateImpl(bot, dmChannel=None):
+async def updateImpl(bot):
     failed = False
     # Clear our registration cache
-
     botGlobals.registrationCache = None
     # Update the registration database with additional DISCORD info
     rData = await userData.getDataCollection(botGlobals.registrationData)
     if rData is not None:
         cursor = rData.find()
-        if dmChannel is not None:
-            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ')
         updateData = []
         r = await cursor.to_list(length=1)
-        if dmChannel is not None:
-            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ' + str(len(r)))
         while r:
             r = r[0]
-            if dmChannel is not None:
-                await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(r))
             nickName = None
             for m in bot.get_all_members():
                 if m.id == r['id']:
                     nickName = m.nick
                     break
-            if dmChannel is not None:
-                await dmChannel.send('# DEBUG (NEW) updateImpl finished NICK search ')
+
             gender = 'male'
             if gender in r:
                 gender = r['gender']
@@ -139,17 +131,9 @@ async def updateImpl(bot, dmChannel=None):
 
             r = await cursor.to_list(length=1)
 
-        if dmChannel is not None:
-            await dmChannel.send('DEBUG: ')
-            if updateData:
-                await dmChannel.send('We have data')
-            else:
-                await dmChannel.send('NO DATA')
         # Delete everything
         result = await rData.delete_many({'id': {"$exists": True}})
         for d in updateData:
-            if dmChannel is not None:
-                await dmChannel.send('Data: '+str(d))
             dataset = await userData.setData(collectionName=botGlobals.registrationData,
                                              data=d)
 
