@@ -114,12 +114,16 @@ async def updateImpl(bot):
                 if m.id == r['id']:
                     nickName = m.nick
                     break
+            gender = 'male'
+            if r['gender']:
+                gender = r['gender']
+
             d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
-                 'avatar_url':r['avatar_url']}
+                 'avatar_url':r['avatar_url'], 'gender':gender}
 
             if nickName is not None:
                 d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
-                     'avatar_url':r['avatar_url'], 'nick':nickName}
+                     'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
             updateData.append(d)
         # Delete everything
         result = await registrationData.delete_many({'id': {"$exists": True}})
