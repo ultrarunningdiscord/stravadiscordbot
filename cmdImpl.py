@@ -102,17 +102,19 @@ async def registerCacheImpl(channel, bot, discordId):
 async def updateImpl(bot, dmChannel=None):
     failed = False
     # Clear our registration cache
-    if dmChannel is not None:
-        await dmChannel.send('# DEBUG updateImpl '+str(botGlobals.registrationData))
+
     botGlobals.registrationCache = None
     # Update the registration database with additional DISCORD info
     rData = await userData.getDataCollection(botGlobals.registrationData)
     if rData is not None:
-        if dmChannel is not None:
-            await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(rData))
         cursor = rData.find()
+        if dmChannel is not None:
+            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ')
         updateData = []
-        for r in await cursor.to_list(length=1000):
+        regs = await cursor.to_list(length=1000)
+        if dmChannel is not None:
+            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ' + str(len(regs)))
+        for r in regs:
             if dmChannel is not None:
                 await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(r))
             nickName = None
