@@ -111,21 +111,22 @@ async def updateImpl(bot, dmChannel=None):
         if dmChannel is not None:
             await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ')
         updateData = []
-        regs = await cursor.to_list(length=1000)
+        r = await cursor.to_list(length=1)
         if dmChannel is not None:
-            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ' + str(len(regs)))
-        for r in regs:
+            await dmChannel.send('# DEBUG (NEW doc size) updateImpl size ' + str(len(r)))
+        while r:
+            r = r[0]
             if dmChannel is not None:
                 await dmChannel.send('# DEBUG (NEW) updateImpl rData '+str(r))
             nickName = None
-            # for m in bot.get_all_members():
-            #     if m.id == r['id']:
-            #         nickName = m.nick
-            #         break
+            for m in bot.get_all_members():
+                if m.id == r['id']:
+                    nickName = m.nick
+                    break
             if dmChannel is not None:
                 await dmChannel.send('# DEBUG (NEW) updateImpl finished NICK search ')
             gender = 'male'
-            if r['gender']:
+            if gender in r:
                 gender = r['gender']
 
             d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
@@ -135,8 +136,9 @@ async def updateImpl(bot, dmChannel=None):
                 d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
                      'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
             updateData.append(d)
-            if dmChannel is not None:
-                await dmChannel.send('# DEBUG (NEW) FINISHED UPDTATE updateImpl  '+str(updateData))
+
+            r = await cursor.to_list(length=1)
+
         if dmChannel is not None:
             await dmChannel.send('DEBUG: ')
             if updateData:
