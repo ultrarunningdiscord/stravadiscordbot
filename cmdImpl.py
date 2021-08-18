@@ -125,6 +125,12 @@ async def updateImpl(bot, dmChannel=None):
                 d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
                      'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
             updateData.append(d)
+        if dmChannel is not None:
+            await dmChannel.send('DEBUG: ')
+            if updateData:
+                await dmChannel.send('We have data')
+            else:
+                await dmChannel.send('NO DATA')
         # Delete everything
         result = await registrationData.delete_many({'id': {"$exists": True}})
         for d in updateData:
