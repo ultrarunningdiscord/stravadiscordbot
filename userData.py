@@ -56,6 +56,7 @@ async def buildRegistrationCache():
             botGlobals.registrationCache = {}
             r = await cursor.to_list(length=1)
             while r:
+                r = r[0]
                 gender = 'male'
                 if 'gender' in r:
                     gender = r['gender']
@@ -174,6 +175,7 @@ async def clearLeaderBoardCache():
         updateData = []
         r = await cursor.to_list(length=1)
         while r:
+            r = r[0]
             expiration = pickle.loads(r['expires'])
             if datetime.utcnow() > expiration:
                 updateData.append(r)
