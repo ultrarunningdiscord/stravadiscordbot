@@ -68,7 +68,7 @@ async def _distanceLeader(ctx, *args):
 
             await dmChannel.send('currentMale'+str(currentMale))
             await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=currentMale['male'],
-                                       currentLeader=currentMale, channel=dmChannel)
+                                       currentLeader=currentMale['male'], channel=None)
         except Exception as e:
             await dmChannel.send(e)
 

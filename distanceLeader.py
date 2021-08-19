@@ -30,22 +30,42 @@ async def crownDistanceLeaders():
 
 
             currentMale, currentFemale = await userData.getDistanceLeader()
+            maleWinner = None
+            femaleWinner = None
             if distanceWinnerMale is not None:
 
 
 
                 # Put into database
                 await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
-                await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
-                                           currentLeader=currentMale)
+                maleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
+                                                        currentLeader=currentMale['male'])
             if distanceWinnerFemale is not None:
 
 
                 # Put into database
                 await userData.setDistanceLeader(gender='female', id=distanceWinnerFemale)
-                await cmdImpl.assignLeader(role=botGlobals.distanceFemaleRole, id=distanceWinnerFemale,
-                                           currentLeader=currentFemale)
+                femaleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceFemaleRole, id=distanceWinnerFemale,
+                                                          currentLeader=currentFemale['female'])
 
+            announceChannel = None
+            for c in botGlobals.bot.get_all_channels():
+                if c.name == botGlobals.announceChannel:
+                    announceChannel = c
+
+            if announceChannel is not None:
+                doAnnounce = False
+                mesg = 'Last week leaderboard results:\n'
+
+                if maleWinner is not None:
+                    doAnnounce = True
+                    mesg += maleWinner.mention + ': Distance King.'
+                if maleWinner is not None:
+                    doAnnounce = True
+                    mesg += femaleWinner.mention + ': Distance Queen.'
+
+                if doAnnounce:
+                    await announceChannel.send(mesg)
 
 
 

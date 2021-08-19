@@ -284,18 +284,21 @@ async def assignLeader(role, id, currentLeader, channel=None):
                 distanceRole = r
                 break
 
+    winner = None
     if distanceRole is not None:
         # Remove the distance leader role
         if currentLeader is not None:
             for m in botGlobals.bot.get_all_members():
-                if m.id == currentLeader['male']:
+                if m.id == currentLeader:
                     await m.remove_roles(distanceRole)
-                if m.id == currentLeader['female']:
-                    await m.remove_roles(distanceRole)
+
 
         # Assign the role
         for m in botGlobals.bot.get_all_members():
             if m.id == id:
                 # Assign role and save this
                 await m.add_roles(distanceRole)
+                winner = m
                 break
+
+    return winner

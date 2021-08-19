@@ -13,6 +13,7 @@ import userData
 
 # Global data for environment, tokens, other global information the bot needs as well as global functions
 admin = [302457136959586304, 267777327885320193, 498195545228312578]
+announceChannel = 'announcements'
 bot = None
 botToken = None
 cacheTimeout = 3600
