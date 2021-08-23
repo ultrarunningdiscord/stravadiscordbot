@@ -108,7 +108,7 @@ async def _distanceLeader(ctx, *args):
                 for c in botGlobals.bot.get_all_channels():
                     if c.name == botGlobals.announceChannel:
                         announceChannel = c
-
+                await dmChannel.send('Announce channel '+str(announceChannel))
                 if announceChannel is not None:
                     doAnnounce = False
                     mesg = 'Last week leaderboard results:\n'
