@@ -118,7 +118,7 @@ async def updateImpl(bot):
                     break
 
             gender = 'male'
-            if gender in r:
+            if "gender" in r:
                 gender = r['gender']
 
             d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
