@@ -59,10 +59,10 @@ async def crownDistanceLeaders():
 
                 if maleWinner is not None:
                     doAnnounce = True
-                    mesg += maleWinner.mention + ': Distance King.'
+                    mesg += maleWinner.mention + ': Distance King.\n'
                 if femaleWinner is not None:
                     doAnnounce = True
-                    mesg += femaleWinner.mention + ': Distance Queen.'
+                    mesg += femaleWinner.mention + ': Distance Queen.\n'
 
                 if doAnnounce:
                     await announceChannel.send(mesg)
