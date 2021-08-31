@@ -33,14 +33,16 @@ async def debug(ctx, *args):
         embed = discord.Embed(color=0x00ff00)
         embed.title = f"**DEBUG:**\n"
         embed.description = botGlobals.debugInit
-        # for g in botGlobals.bot.guilds:
+        for g in botGlobals.bot.guilds:
         #     print('# ALS -g '+str(g))
-        #     role = g.default_role
-        #     await ctx.send(f'{role}')
-        for m in botGlobals.bot.get_all_members():
+            role = g.default_role
+            await dmChannel.send('# DEBUG: '+str(g.name))
+            await dmChannel.send(f'{role}')
 
-            if m.name == 'Verified Member':
-                await dmChannel.send('# Found verified member')
+        # for m in botGlobals.bot.get_all_members():
+        #
+        #     if m.name == 'Verified Member':
+        #         await dmChannel.send('# Found verified member')
 
 
     #await dmChannel.send(embed=embed)
