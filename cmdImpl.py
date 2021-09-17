@@ -7,7 +7,7 @@ import botGlobals
 import userData
 
 # Helper implementations for various bot commands to facilitate simple re-use and maintenance
-async def leaderboardImpl(channel, bot, entries=None):
+async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None):
     linesPerEmbed = 20
 
     embedMesg = []
@@ -22,7 +22,18 @@ async def leaderboardImpl(channel, bot, entries=None):
 
     if leaderboardJSON is not None:
         leaderboardMsg = ""
-        for i, rankedUser in enumerate(leaderboardJSON['data']):
+        currentLeaderboard = []
+        for rankedUser in leaderboardJSON['data']:
+            athleteId = rankedUser['athlete_id']
+            if registeredOnly:
+
+                aUser = await userData.retrieveNickname(athleteId)
+                if aUser is not None:
+                    currentLeaderboard.append(rankedUser)
+            else:
+                currentLeaderboard.append(rankedUser)
+
+        for i, rankedUser in enumerate(currentLeaderboard):
             if entries is not None:
                 if i >= entries:
                     break
@@ -35,7 +46,8 @@ async def leaderboardImpl(channel, bot, entries=None):
             aUser = await userData.retrieveNickname(athleteId)
 
 
-            leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
+            #leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
+            leaderboardMsg +=   boldstr + str(i+1) + '. '
 
             if aUser is not None:
                 leaderboardMsg += aUser
@@ -84,7 +96,7 @@ async def leaderboardImpl(channel, bot, entries=None):
     return leaderboardJSON
 
 async def registerCacheImpl(channel, bot, discordId):
-    leaderboard = await leaderboardImpl(channel=channel, bot=bot)
+    leaderboard = await leaderboardImpl(channel=channel, bot=bot, registeredOnly=False)
     # Display information for the user to execute the command to associate the strava id w/ discord id
     mesg = '\n\n'
     mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'

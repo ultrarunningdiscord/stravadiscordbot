@@ -53,7 +53,7 @@ commandList.append(debug)
 async def _fullleaderboard(ctx, *args):
     user = ctx.message.author
     currChannel = ctx.message.channel
-    await cmdImpl.leaderboardImpl(channel=currChannel, bot=ctx.bot)
+    await cmdImpl.leaderboardImpl(channel=currChannel, bot=ctx.bot, registeredOnly=False)
 
 commandList.append(_fullleaderboard)
 
@@ -328,7 +328,7 @@ async def _register(ctx, *args):
 
                         if dataSet:
                             # Display leaderboard for last check
-                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot, registeredOnly=False)
                             # Remove cache and cache expiration
                             mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
                             mesg += '       !register erase then !register to restart registration process.'
@@ -408,7 +408,7 @@ async def _register(ctx, *args):
 
                         if dataSet:
                             # Display leaderboard for last check
-                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot)
+                            await cmdImpl.leaderboardImpl(channel=dmChannel, bot=ctx.bot, registeredOnly=False)
                             # Remove cache and cache expiration
                             mesg = 'Please check above leaderboard to see if its accurate. If not type:\n'
                             mesg += '       !register erase then !register to restart registration process.'
