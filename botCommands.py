@@ -171,8 +171,10 @@ async def _lastmonth(ctx, *args):
     dataValues = {}
 
 
-
-    lastMonth = botGlobals.currentMonthYear-1
+    currentTime = datetime.now()
+    currentMonth = currentTime.month
+    lastMonth = currentTime.replace(month=currentMonth-1).strftime(botGlobals.monthFormat)
+    #lastMonth = botGlobals.currentMonthYear-1
     currentMileage = await userData.getMontlyMileage(monthyear=lastMonth)
 
     # Add the mileage together
@@ -189,7 +191,7 @@ async def _lastmonth(ctx, *args):
     embedMesg = []
     embed = discord.Embed()
     embed = discord.Embed(color=0x0000ff)
-    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {botGlobals.currentMonthYear} Monthly Distance Leaderboard:**\n"
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {lastMonth} Monthly Distance Leaderboard:**\n"
 
     embedMesg.append(embed)
     embed = discord.Embed()
@@ -246,6 +248,7 @@ async def _lastmonth(ctx, *args):
     embedMesg.append(embed)
     for e in embedMesg:
         await currChannel.send(embed=e)
+commandList.append(_lastmonth)
 
 @commands.command(name='leaderboard', aliases=('lb','leader'))
 async def _leaderboard(ctx, *args):
