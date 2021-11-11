@@ -33,19 +33,31 @@ async def debug(ctx, *args):
         embed = discord.Embed(color=0x00ff00)
         embed.title = f"**DEBUG:**\n"
         embed.description = botGlobals.debugInit
-        for g in botGlobals.bot.guilds:
-        #     print('# ALS -g '+str(g))
-            role = g.default_role
-            await dmChannel.send('# DEBUG: '+str(g.name))
-            await dmChannel.send(f'{role}')
+        monthCollection = await userData.getDataCollection(botGlobals.monthlyMileageData)
+        currentMileage = await userData.getMontlyMileage(monthyear=botGlobals.currentMonthYear)
+        await dmChannel.send('Test ')
+        currentTime = datetime.now()
+        currentMonth = currentTime.month
+        currentMonthYear = currentTime.strftime(botGlobals.monthFormat)
 
-        # for m in botGlobals.bot.get_all_members():
-        #
-        #     if m.name == 'Verified Member':
-        #         await dmChannel.send('# Found verified member')
+        leaderboardJSON = await botGlobals.loadLastLeaderboard()
+
+        if leaderboardJSON is not None:
+            # Monthly data is format
+            # {"6.2021" : {'stravaId': {meters,
+            #             'stravaId2': meters}}
+            dataValues = {}
+            for i, rankedUser in enumerate(leaderboardJSON['data']):
+                athleteId = rankedUser['athlete_id']
+                meters = rankedUser['distance']
+                dataValues[str(athleteId)] = rankedUser['distance']
+
+            await userData.setMontlyMileage(monthyear=currentMonthYear, data=dataValues)
 
 
-    #await dmChannel.send(embed=embed)
+
+
+
 
 commandList.append(debug)
 
@@ -145,6 +157,95 @@ async def _distanceLeader(ctx, *args):
 
     pass
 commandList.append(_distanceLeader)
+
+@commands.command(name='lastmonth', aliases=('last', 'lmonth'))
+async def _lastmonth(ctx, *args):
+    user = ctx.message.author
+    currChannel = ctx.message.channel
+
+
+
+    # Monthly data is format
+    # {"6_2021" : {'stravaId': meters,
+    #             'stravaId2': meters}}
+    dataValues = {}
+
+
+
+    lastMonth = botGlobals.currentMonthYear-1
+    currentMileage = await userData.getMontlyMileage(monthyear=lastMonth)
+
+    # Add the mileage together
+    metersPerAthlete = currentMileage[lastMonth]
+    for strava,m in metersPerAthlete.items():
+
+        dataValues[strava] = m
+
+
+
+    # Display the new information
+    dataValues = dict(sorted(dataValues.items(), key=lambda x: x[1], reverse=True))
+    linesPerEmbed = 20
+    embedMesg = []
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x0000ff)
+    embed.title = f"**{botGlobals.STRAVACLUB_PRETTYNAME} {botGlobals.currentMonthYear} Monthly Distance Leaderboard:**\n"
+
+    embedMesg.append(embed)
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x0000ff)
+    i = 0
+    leaderboardMsg = ""
+    for strava,m in dataValues.items():
+        # Don't display until the athlete overcame the left-over mileage at the beginning of month
+        if m <= 0:
+            continue
+
+        boldstr = ""
+        if i < 10:
+            boldstr = "**"
+
+        aUser = await userData.retrieveNickname(int(strava))
+
+
+
+        if aUser is not None:
+            leaderboardMsg += boldstr + str(i+1) + '. '
+            leaderboardMsg += aUser
+
+
+            leaderboardMsg +=   ' - ' + \
+                                "{:,}".format(round(m/1000, 2)) + \
+                                ' km (' + \
+                                metersToMiles(m) + \
+                                ')' + boldstr + '\n'
+            # Printing everything so use lines per embed
+            if linesPerEmbed <= 0:
+                # Store current
+                embed.description = leaderboardMsg
+                embedMesg.append(embed)
+
+                # Start a new embed message
+                embed = discord.Embed()
+                embed = discord.Embed(color=0x0000ff)
+                linesPerEmbed = 20
+                leaderboardMsg = ''
+            else:
+                linesPerEmbed -= 1
+            i += 1
+
+
+    if leaderboardMsg:
+        embed.description = leaderboardMsg
+        embedMesg.append(embed)
+    # Add info text at hte bottom
+    embed = discord.Embed()
+    embed = discord.Embed(color=0x0000ff)
+    infoMesg = 'Shows and tracks registered users only. Type !register for details on how to register.'
+    embed.description = infoMesg
+    embedMesg.append(embed)
+    for e in embedMesg:
+        await currChannel.send(embed=e)
 
 @commands.command(name='leaderboard', aliases=('lb','leader'))
 async def _leaderboard(ctx, *args):

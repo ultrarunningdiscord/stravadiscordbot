@@ -97,14 +97,17 @@ async def updateMonthlyData():
                 currentMileage = await userData.getMontlyMileage(monthyear=botGlobals.currentMonthYear)
 
                 # Add the mileage together
-                metersPerAthlete = currentMileage[botGlobals.currentMonthYear]
-                for strava,m in metersPerAthlete.items():
-                    if strava in dataValues:
-                        # Update their total mileage
-                        dataValues[strava] = dataValues[strava] + m
-                    else:
-                        # New person add to the month
-                        dataValues[strava] = m
+                try:
+                    metersPerAthlete = currentMileage[botGlobals.currentMonthYear]
+                    for strava,m in metersPerAthlete.items():
+                        if strava in dataValues:
+                            # Update their total mileage
+                            dataValues[strava] = dataValues[strava] + m
+                        else:
+                            # New person add to the month
+                            dataValues[strava] = m
+                except Exception as e:
+                    print(e)
 
 
                 await userData.setMontlyMileage(monthyear=botGlobals.currentMonthYear, data=dataValues)
