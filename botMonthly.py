@@ -58,16 +58,18 @@ async def updateMonthlyData():
                 # Add last weeks to this weeks
                 # Use the global saved month as this could be day #1 of a new month
                 currentMileage = await userData.getMontlyMileage(monthyear=botGlobals.currentMonthYear)
+                if currentMileage is not None:
 
-                # Add the mileage together
-                metersPerAthlete = currentMileage[botGlobals.currentMonthYear]
-                for strava,m in metersPerAthlete.items():
-                    if strava in dataValues:
-                        # Update their total mileage
-                        dataValues[strava] = dataValues[strava] + m
-                    else:
-                        # New person add to the month
-                        dataValues[strava] = m
+
+                    # Add the mileage together
+                    metersPerAthlete = currentMileage[botGlobals.currentMonthYear]
+                    for strava,m in metersPerAthlete.items():
+                        if strava in dataValues:
+                            # Update their total mileage
+                            dataValues[strava] = dataValues[strava] + m
+                        else:
+                            # New person add to the month
+                            dataValues[strava] = m
 
 
                 await userData.setMontlyMileage(monthyear=botGlobals.currentMonthYear, data=dataValues)
