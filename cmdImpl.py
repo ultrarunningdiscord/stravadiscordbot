@@ -99,7 +99,8 @@ async def registerCacheImpl(channel, bot, discordId):
     leaderboard = await leaderboardImpl(channel=channel, bot=bot, registeredOnly=False)
     # Display information for the user to execute the command to associate the strava id w/ discord id
     mesg = '\n\n'
-    mesg += '```To associate your discord ID with a specific Strava rank in the leaderboard.\n'
+    mesg += '```Find your Strava name and mileage on the leaderboard, then type !register [number] [m or f].\n'
+    mesg += 'If its not there, try again a few days after joining the strava group and logging a run.\n'
     mesg += '!register <rank> <gender(m or f)>\n'
     mesg += 'If you make a mistake, just use !register erase```'
     await channel.send(mesg)
