@@ -65,6 +65,12 @@ async def crownDistanceLeaders():
                     mesg += femaleWinner.mention + ': Distance Queen.\n'
 
                 if doAnnounce:
+                    try:
+                        await cmdImpl.leaderboardImpl(channel=announceChannel, bot=botGlobals.bot,registeredOnly=True,
+                                                      entries=None, leaderboardJSON=leaderboardJSON)
+                    except Exception as e:
+                        print(e)
+
                     await announceChannel.send(mesg)
 
 
