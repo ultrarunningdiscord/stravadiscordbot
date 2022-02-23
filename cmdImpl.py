@@ -7,7 +7,7 @@ import botGlobals
 import userData
 
 # Helper implementations for various bot commands to facilitate simple re-use and maintenance
-async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None):
+async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None, leaderboardJSON=None):
     linesPerEmbed = 20
 
     embedMesg = []
@@ -18,7 +18,8 @@ async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None):
         embedMesg.append(embed)
         embed = discord.Embed()
         embed = discord.Embed(color=0x0000ff)
-    leaderboardJSON = await botGlobals.loadLeaderboard()
+    if leaderboardJSON is None:
+        leaderboardJSON = await botGlobals.loadLeaderboard()
 
     if leaderboardJSON is not None:
         leaderboardMsg = ""
