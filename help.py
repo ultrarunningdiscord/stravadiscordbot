@@ -35,6 +35,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
         await self.helpImpl(ctx)
 
     async def helpImpl(self, ctx=None):
+        print('# ALS - helpImpl')
         embed = await helpMsg()
         if ctx is not None:
             currChannel = ctx.message.channel
