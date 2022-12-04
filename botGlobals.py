@@ -144,9 +144,10 @@ def init(stravaBot):
         global userDataBase
         global debugInit
         try:
+            uri = 'mongodb://' + MONGO_USER + ':' + MONGO_PASSWD + '@localhost:27017/' + MONGO_DB_NAME
             mSite = 'mongodb+srv://' + MONGO_USER + ':' + MONGO_PASSWD + '@' + MONGO_DB_NAME
             mSite += '.mongodb.net/' + userDataFile + '?retryWrites=true&w=majority'
-            mongoClient = motor.motor_tornado.MotorClient(mSite)
+            mongoClient = motor.motor_tornado.MotorClient(uri)
             if mongoClient is not None:
                 mongoDb = mongoClient[userDataFile]
             else:
