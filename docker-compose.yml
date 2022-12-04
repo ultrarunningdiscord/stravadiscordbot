@@ -23,7 +23,7 @@ services:
     env_file:
       - .secrets.env
     container_name: container-stravabot
-    image: ghcr.io/ultrarunningdiscord/stravadiscordbot:latest
+    image: ghcr.io/ultrarunningdiscord/stravadiscordbot:main
     restart: always
     ports:
       - 3000:3000
