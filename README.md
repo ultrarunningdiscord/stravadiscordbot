@@ -2,6 +2,8 @@
 
 The world famous discord strava leaderboard bot! 
 
+<img width="571" alt="image" src="https://user-images.githubusercontent.com/7058938/205496997-38693a06-592d-4970-8af2-0b8cc34b6d16.png">
+
 Everything deploys using docker-compose.
 
 `docker-compose up`
