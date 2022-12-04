@@ -14,11 +14,6 @@ import dataUpdater
 import distanceLeader
 import help
 
-
-
-
-
-
 BOT_PREFIX = ("!")
 intents = discord.Intents.default()
 intents.members = True
