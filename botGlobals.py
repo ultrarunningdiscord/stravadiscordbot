@@ -3,7 +3,6 @@ import json
 import motor.motor_tornado
 import os
 import pickle
-import redis
 import requests
 import sys
 import time

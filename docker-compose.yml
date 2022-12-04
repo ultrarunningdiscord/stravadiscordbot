@@ -19,7 +19,7 @@ services:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   stravabot:
     container_name: container-stravabot
-    image: ghcr.io/ultrarunningdiscord/stravadiscordbot/stravadiscordbot:latest
+    image: ghcr.io/ultrarunningdiscord/stravadiscordbot:latest
     restart: always
     ports:
       - 3000:3000
