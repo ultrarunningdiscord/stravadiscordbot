@@ -137,6 +137,11 @@ def init(stravaBot):
     if MONGO_DB_NAME is None:
         print("MONGO_DB_NAME variable not set. Unable to connect to database.")
 
+    global MONGO_DB_HOST
+    MONGO_DB_HOST = os.environ.get('MONGO_DB_HOST')
+    if MONGO_DB_HOST is None:
+        print("MONGO_DB_HOST variable not set. Unable to connect to database.")
+
     if not failedMongo:
 
         global mongoClient, mongoDb
@@ -144,9 +149,7 @@ def init(stravaBot):
         global userDataBase
         global debugInit
         try:
-            uri = 'mongodb://' + MONGO_USER + ':' + MONGO_PASSWD + '@localhost:27017/' + MONGO_DB_NAME
-            mSite = 'mongodb+srv://' + MONGO_USER + ':' + MONGO_PASSWD + '@' + MONGO_DB_NAME
-            mSite += '.mongodb.net/' + userDataFile + '?retryWrites=true&w=majority'
+            uri = 'mongodb://' + MONGO_USER + ':' + MONGO_PASSWD + '@' + MONGO_DB_HOST + ':27017/' + MONGO_DB_NAME
             mongoClient = motor.motor_tornado.MotorClient(uri)
             if mongoClient is not None:
                 mongoDb = mongoClient[userDataFile]
