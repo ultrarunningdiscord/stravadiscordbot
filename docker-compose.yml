@@ -1,6 +1,8 @@
 version: "3.7"
 services:
   mongo:
+    env_file:
+    - .secrets.env
     container_name: container-mongodb
     image: mongo:latest
     restart: always
@@ -18,6 +20,8 @@ services:
     volumes:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   stravabot:
+    env_file:
+      - .secrets.env
     container_name: container-stravabot
     image: ghcr.io/ultrarunningdiscord/stravadiscordbot:latest
     restart: always
