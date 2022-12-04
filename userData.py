@@ -232,4 +232,3 @@ async def setDistanceLeader(gender, id):
     # Set the data
     dataset = await setData(collectionName=botGlobals.distanceLeader,
                             data={gender:id})
-
