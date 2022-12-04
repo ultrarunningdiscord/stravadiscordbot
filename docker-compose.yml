@@ -33,3 +33,4 @@ services:
       MONGO_USER: root
       MONGO_PASSWD: password
       MONGO_DB_NAME: db
+      MONGO_DB_HOST: mongo
