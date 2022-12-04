@@ -126,7 +126,6 @@ def init(stravaBot):
         print("MONGO_USER variable not set. Unable to connect to database.")
         failedMongo = True
 
-
     global MONGO_PASSWD
     MONGO_PASSWD = os.environ.get('MONGO_PASSWD')
     if MONGO_PASSWD is None:
