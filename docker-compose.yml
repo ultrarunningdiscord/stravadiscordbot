@@ -1,24 +1,24 @@
 version: "3.7"
 services:
-  mongo:
-    env_file:
-    - .secrets.env
-    container_name: container-mongodb
-    image: mongo:latest
-    restart: always
-    ports:
-      - 27017:27017
+#   mongo:
+#     env_file:
+#     - .secrets.env
+#     container_name: container-mongodb
+#     image: mongo:latest
+#     restart: always
+#     ports:
+#       - 27017:27017
 
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: db
-      MONGO_USER: root
-      MONGO_PASSWD: password
-      MONGO_DB_NAME: db
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: root
+#       MONGO_INITDB_ROOT_PASSWORD: password
+#       MONGO_INITDB_DATABASE: db
+#       MONGO_USER: root
+#       MONGO_PASSWD: password
+#       MONGO_DB_NAME: db
 
-    volumes:
-      - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+#     volumes:
+#       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
   stravabot:
     env_file:
       - .secrets.env
