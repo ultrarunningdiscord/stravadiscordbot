@@ -92,6 +92,7 @@ async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None, leade
                 await channel.send(embed=e)
     else:
         if channel is not None:
+            print('# ALS - failed to load')
             await channel.send('Failed to load leaderboard. Please try again later.')
 
     return leaderboardJSON

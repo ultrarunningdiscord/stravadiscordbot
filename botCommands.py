@@ -17,6 +17,15 @@ import userData
 # Commands for the bot...just make sure to append to the commandList to register the command
 commandList = []
 
+
+@commands.command()
+async def shutdown(ctx, *args):
+    admin = await botGlobals.checkAdmin(ctx=ctx)
+    if admin:
+        await ctx.bot.logout()
+
+commandList.append(shutdown)
+
 @commands.command()
 async def debug(ctx, *args):
     user = ctx.message.author
@@ -443,6 +452,7 @@ async def _register(ctx, *args):
 
                 else:
                     # Failed to load leaderboard
+                    print('# ALS - failed to load')
                     await dmChannel.send('Failed to load leaderboard try again later.')
             else:
                 # Cache is invalid display leaderboard and re-cache
@@ -470,6 +480,7 @@ async def _register(ctx, *args):
                             if deleteWorked:
                                 await dmChannel.send('{ADMIN} : Deletion success.')
                     else:
+                        print('# ALS - failed to load(3)')
                         await dmChannel.send('Failed to load the leaderboard.')
 
                 pass
@@ -523,6 +534,7 @@ async def _register(ctx, *args):
 
                 else:
                     # Failed to load leaderboard
+                    print('# ALS - failed to load')
                     await dmChannel.send('Failed to load leaderboard try again later.')
             else:
                 # Cache is invalid display leaderboard and re-cache
