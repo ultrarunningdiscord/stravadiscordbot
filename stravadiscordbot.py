@@ -15,7 +15,7 @@ import distanceLeader
 import help
 
 BOT_PREFIX = ("!")
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
 stravaBot = Bot(command_prefix=BOT_PREFIX, intents=intents)
 
@@ -35,7 +35,7 @@ async def on_ready():
     botMonthly.updateMonthlyData.start()
 
 
-m_loop = asyncio.get_event_loop()
+m_loop = asyncio.new_event_loop()
 
 def main():
     botGlobals.init(stravaBot=stravaBot) # Initialize all the environment variables, etc.
