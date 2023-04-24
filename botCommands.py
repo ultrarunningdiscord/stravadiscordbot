@@ -13,18 +13,10 @@ import botGlobals
 import cmdImpl
 import help
 import userData
+import distanceLeader
 
 # Commands for the bot...just make sure to append to the commandList to register the command
 commandList = []
-
-
-@commands.command()
-async def shutdown(ctx, *args):
-    admin = await botGlobals.checkAdmin(ctx=ctx)
-    if admin:
-        await ctx.bot.logout()
-
-commandList.append(shutdown)
 
 @commands.command()
 async def debug(ctx, *args):
@@ -41,7 +33,7 @@ async def debug(ctx, *args):
         embed.description = botGlobals.debugInit
         monthCollection = await userData.getDataCollection(botGlobals.monthlyMileageData)
         currentMileage = await userData.getMontlyMileage(monthyear=botGlobals.currentMonthYear)
-        await dmChannel.send('Test ')
+        await dmChannel.send('Test working...')
         currentTime = datetime.now()
         currentMonth = currentTime.month
         currentMonthYear = currentTime.strftime(botGlobals.monthFormat)
@@ -49,16 +41,19 @@ async def debug(ctx, *args):
         leaderboardJSON = await botGlobals.loadLastLeaderboard()
 
         if leaderboardJSON is not None:
+            await dmChannel.send('Crown last weeks...')
             # Monthly data is format
             # {"6.2021" : {'stravaId': {meters,
             #             'stravaId2': meters}}
-            dataValues = {}
-            for i, rankedUser in enumerate(leaderboardJSON['data']):
-                athleteId = rankedUser['athlete_id']
-                meters = rankedUser['distance']
-                dataValues[str(athleteId)] = rankedUser['distance']
+            # dataValues = {}
+            # for i, rankedUser in enumerate(leaderboardJSON['data']):
+            #     athleteId = rankedUser['athlete_id']
+            #     meters = rankedUser['distance']
+            #     dataValues[str(athleteId)] = rankedUser['distance']
+            #
+            # await userData.setMontlyMileage(monthyear=currentMonthYear, data=dataValues)
+            await distanceLeader.crownDistanceLeadersImpl(channel=dmChannel)
 
-            await userData.setMontlyMileage(monthyear=currentMonthYear, data=dataValues)
 
 
 
@@ -545,6 +540,14 @@ async def _register(ctx, *args):
     botGlobals.registrationCache = None
 
 commandList.append(_register)
+
+@commands.command()
+async def shutdown(ctx, *args):
+    admin = await botGlobals.checkAdmin(ctx=ctx)
+    if admin:
+        await ctx.bot.close()
+
+commandList.append(shutdown)
 
 @commands.command()
 async def stats(ctx, *args):
