@@ -136,11 +136,6 @@ def init(stravaBot):
     if MONGO_DB_NAME is None:
         print("MONGO_DB_NAME variable not set. Unable to connect to database.")
 
-    global MONGO_DB_HOST
-    MONGO_DB_HOST = os.environ.get('MONGO_DB_HOST')
-    if MONGO_DB_HOST is None:
-        print("MONGO_DB_HOST variable not set. Unable to connect to database.")
-
     if not failedMongo:
 
         global mongoClient, mongoDb

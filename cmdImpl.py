@@ -295,25 +295,40 @@ async def assignLeader(role, id, currentLeader, channel=None):
     distanceRole = None
     for g in botGlobals.bot.guilds:
         for r in g.roles:
+            if channel is not None:
+                await channel.send('Roles : ' + str(r))
             if r.name == role:
                 distanceRole = r
                 break
+    if channel is not None:
+        aUser = await userData.retrieveNick(currentLeader)
 
+        await channel.send('Found distance role ' + str(distanceRole) + ' current leader ' + str(currentLeader) +
+                           ' nick ' + str(aUser))
     winner = None
     if distanceRole is not None:
         # Remove the distance leader role
         if currentLeader is not None:
             for m in botGlobals.bot.get_all_members():
                 if m.id == currentLeader:
-                    await m.remove_roles(distanceRole)
+                    try:
+                        await m.remove_roles(distanceRole)
+                        break
+                    except:
+                        print('# Failed removal role exception')
 
+        if channel is not None:
+            await channel.send('Removed role successful')
 
         # Assign the role
         for m in botGlobals.bot.get_all_members():
             if m.id == id:
                 # Assign role and save this
-                await m.add_roles(distanceRole)
-                winner = m
+                try:
+                    await m.add_roles(distanceRole)
+                    winner = m
+                except:
+                    print('# Failed to assign role')
                 break
 
     return winner
