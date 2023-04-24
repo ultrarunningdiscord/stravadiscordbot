@@ -3,7 +3,6 @@ import json
 import motor.motor_tornado
 import os
 import pickle
-import redis
 import requests
 import sys
 import time
@@ -127,7 +126,6 @@ def init(stravaBot):
         print("MONGO_USER variable not set. Unable to connect to database.")
         failedMongo = True
 
-
     global MONGO_PASSWD
     MONGO_PASSWD = os.environ.get('MONGO_PASSWD')
     if MONGO_PASSWD is None:
@@ -137,6 +135,11 @@ def init(stravaBot):
     MONGO_DB_NAME = os.environ.get('MONGO_DB_NAME')
     if MONGO_DB_NAME is None:
         print("MONGO_DB_NAME variable not set. Unable to connect to database.")
+
+    global MONGO_DB_HOST
+    MONGO_DB_HOST = os.environ.get('MONGO_DB_HOST')
+    if MONGO_DB_HOST is None:
+        print("MONGO_DB_HOST variable not set. Unable to connect to database.")
 
     if not failedMongo:
 

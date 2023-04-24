@@ -17,5 +17,3 @@ tornado==6.1
 typing-extensions==3.10.0.0
 urllib3==1.26.4
 yarl==1.6.3
-
-redis~=3.5.3

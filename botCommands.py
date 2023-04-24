@@ -14,9 +14,9 @@ import cmdImpl
 import help
 import userData
 
-
 # Commands for the bot...just make sure to append to the commandList to register the command
 commandList = []
+
 
 @commands.command()
 async def shutdown(ctx, *args):
