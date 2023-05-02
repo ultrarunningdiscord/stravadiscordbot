@@ -428,7 +428,7 @@ async def _register(ctx, *args):
                                 break
                         dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId,
                                                                  displayName=ctx.message.author.display_name,
-                                                                 avatarURL=ctx.message.author.avatar_url,
+                                                                 #avatarURL=ctx.message.author.avatar_url,
                                                                  nickname=nickName)
 
                         if dataSet:
@@ -510,7 +510,7 @@ async def _register(ctx, *args):
                                 break
                         dataSet = await userData.setRegistration(discordId=ctx.message.author.id, stravaId=stravaId,
                                                                  displayName=ctx.message.author.display_name,
-                                                                 avatarURL=ctx.message.author.avatar_url,
+                                                                 #avatarURL=ctx.message.author.avatar_url,
                                                                  nickname=nickName, gender=gender)
 
                         if dataSet:

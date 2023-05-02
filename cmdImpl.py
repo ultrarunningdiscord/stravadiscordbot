@@ -137,11 +137,13 @@ async def updateImpl(bot):
                 gender = r['gender']
 
             d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
-                 'avatar_url':r['avatar_url'], 'gender':gender}
+                 #'avatar_url':r['avatar_url'], 'gender':gender}
+                'gender':gender}
 
             if nickName is not None:
                 d = {'id':r['id'], 'stravaId':r['stravaId'], 'display_name':r['display_name'],
-                     'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
+                     #'avatar_url':r['avatar_url'], 'gender':gender, 'nick':nickName}
+                     'gender':gender, 'nick':nickName}
             updateData.append(d)
 
             r = await cursor.to_list(length=1)
