@@ -33,13 +33,17 @@ async def setData(collectionName, data):
 
     return True
 
-async def setRegistration(discordId, stravaId, displayName, avatarURL, nickname=None, gender='male'):
+async def setRegistration(discordId, stravaId, displayName,
+                          #avatarURL,
+                          nickname=None, gender='male'):
     d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
-         'avatar_url':str(avatarURL), 'gender':gender}
+         #'avatar_url':str(avatarURL), 'gender':gender}
+         'gender':gender}
 
     if nickname is not None:
         d = {'id':discordId, 'stravaId':stravaId, 'display_name':displayName,
-             'avatar_url':str(avatarURL), 'nick':nickname, 'gender':gender}
+             #'avatar_url':str(avatarURL), 'nick':nickname, 'gender':gender}
+            'nick':nickname, 'gender':gender}
 
     dataset = await setData(collectionName=botGlobals.registrationData,
                             data=d)
@@ -62,10 +66,12 @@ async def buildRegistrationCache():
                     gender = r['gender']
 
                 botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                                    'avatar_url':r['avatar_url'],'gender':gender}
+                                                                    #'avatar_url':r['avatar_url'],'gender':gender}
+                                                                    'gender':gender}
                 if 'nick' in r:
                     botGlobals.registrationCache[str(r['stravaId'])] = {'id':r['id'], 'display_name':r['display_name'],
-                                                                        'avatar_url':r['avatar_url'], 'nick':r['nick'],
+                                                                        #'avatar_url':r['avatar_url'], 'nick':r['nick'],
+                                                                        'nick':r['nick'],
                                                                         'gender':gender}
                 r = await cursor.to_list(length=1)
 
