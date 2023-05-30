@@ -148,6 +148,13 @@ async def _distanceLeader(ctx, *args):
                         mesg += femaleWinner.mention + ': Distance Queen.\n'
 
                     if doAnnounce:
+                        try:
+                            await cmdImpl.leaderboardImpl(channel=announceChannel, bot=botGlobals.bot,registeredOnly=True,
+                                                  entries=None, leaderboardJSON=leaderboardJSON)
+                        except Exception as e:
+                            print(e)
+
+
                         await announceChannel.send(mesg)
 
         except Exception as e:
@@ -629,7 +636,7 @@ async def update(ctx, *args):
 
     admin = await botGlobals.checkAdmin(ctx=ctx)
     if admin:
-        failed = await cmdImpl.updateImpl(ctx.bot)
+        failed = await cmdImpl.updateImpl(bot=botGlobals.bot)#await cmdImpl.updateImpl(ctx.bot)
         if failed:
             # Failure
             await dmChannel.send('During the update command there was a failure')

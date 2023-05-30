@@ -35,9 +35,14 @@ async def crownDistanceLeadersImpl(channel=None):
 
 
             # Put into database
-            await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
-            maleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
-                                                    currentLeader=currentMale['male'], channel=channel)
+            try:
+                await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
+                maleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
+                                                        currentLeader=currentMale['male'], channel=channel)
+            except:
+                print("Failed to crown male distance leader")
+
+
         if distanceWinnerFemale is not None:
 
 
