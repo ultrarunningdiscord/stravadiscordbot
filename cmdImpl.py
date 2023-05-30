@@ -48,7 +48,7 @@ async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None, leade
 
 
             #leaderboardMsg +=   boldstr + str(rankedUser['rank']) + '. '
-            leaderboardMsg +=   boldstr + str(i+1) + '. '
+            leaderboardMsg += boldstr + str(i+1) + '. '
 
             if aUser is not None:
                 leaderboardMsg += aUser
@@ -61,6 +61,7 @@ async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None, leade
                                 ' km (' + \
                                 metersToMiles(rankedUser['distance']) + \
                                 ')' + boldstr + '\n'
+            
             if entries is None:
                 # Printing everything so use lines per embed
                 if linesPerEmbed <= 0:
@@ -318,6 +319,7 @@ async def assignLeader(role, id, currentLeader, channel=None):
                         break
                     except:
                         print('# Failed removal role exception')
+                        break
 
         if channel is not None:
             await channel.send('Removed role successful')
