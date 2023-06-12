@@ -79,7 +79,9 @@ async def crownDistanceLeadersImpl(channel=None):
 @tasks.loop(minutes=60)
 async def crownDistanceLeaders():
     if datetime.now().hour == botGlobals.resolveTime and datetime.now().weekday() == botGlobals.resolveDay:
-        crownDistanceLeadersImpl()
+        #crownDistanceLeadersImpl()
+        print('# Crown distance leader\n')
+
 
 
 @crownDistanceLeaders.before_loop

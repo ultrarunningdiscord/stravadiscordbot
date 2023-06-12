@@ -61,7 +61,7 @@ async def leaderboardImpl(channel, bot, registeredOnly=True, entries=None, leade
                                 ' km (' + \
                                 metersToMiles(rankedUser['distance']) + \
                                 ')' + boldstr + '\n'
-            
+
             if entries is None:
                 # Printing everything so use lines per embed
                 if linesPerEmbed <= 0:
