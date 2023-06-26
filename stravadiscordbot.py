@@ -30,7 +30,7 @@ for c in botCommands.commandList:
 async def on_ready():
     print('We have logged in as {0.user}'.format(stravaBot))
     dataUpdater.updateDB.start()
-    distanceLeader.crownDistanceLeaders.start()
+    #distanceLeader.crownDistanceLeaders.start()
     botActivity.runningEvent.start()
     botMonthly.updateMonthlyData.start()
 
