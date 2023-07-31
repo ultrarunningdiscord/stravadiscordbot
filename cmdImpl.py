@@ -303,9 +303,8 @@ async def assignLeader(role, id, currentLeader, channel=None):
             if r.name == role:
                 distanceRole = r
                 break
+    aUser = await userData.retrieveNick(currentLeader)
     if channel is not None:
-        aUser = await userData.retrieveNick(currentLeader)
-
         await channel.send('Found distance role ' + str(distanceRole) + ' current leader ' + str(currentLeader) +
                            ' nick ' + str(aUser))
     winner = None
@@ -327,6 +326,7 @@ async def assignLeader(role, id, currentLeader, channel=None):
         # Assign the role
         for m in botGlobals.bot.get_all_members():
             if m.id == id:
+                print('# Assign role...')
                 # Assign role and save this
                 try:
                     await m.add_roles(distanceRole)
