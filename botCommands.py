@@ -121,15 +121,23 @@ async def _distanceLeader(ctx, *args):
 
                     # Put into database
                     await userData.setDistanceLeader(gender='male', id=distanceWinnerMale)
-                    maleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
-                                                            currentLeader=currentMale['male'])
+                    for m in botGlobals.bot.get_all_members():
+                        if m.id == distanceWinnerMale:
+                            maleWinner = m
+                            break
+                    #maleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceMaleRole, id=distanceWinnerMale,
+                                                            #currentLeader=currentMale['male'])
                 if distanceWinnerFemale is not None:
 
 
                     # Put into database
                     await userData.setDistanceLeader(gender='female', id=distanceWinnerFemale)
-                    femaleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceFemaleRole, id=distanceWinnerFemale,
-                                                              currentLeader=currentFemale['female'])
+                    for m in botGlobals.bot.get_all_members():
+                        if m.id == distanceWinnerFemale:
+                            femaleWinner = m
+                            break
+                    #femaleWinner = await cmdImpl.assignLeader(role=botGlobals.distanceFemaleRole, id=distanceWinnerFemale,
+                                                              #currentLeader=currentFemale['female'])
 
                 announceChannel = None
                 for c in botGlobals.bot.get_all_channels():
